@@ -22,7 +22,6 @@ column: number;
 
 interface IQuery {
 __typename: "Query";
-hello: string | null;
 getPage: IPage | null;
 }
 

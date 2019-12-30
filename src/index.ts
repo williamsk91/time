@@ -46,7 +46,7 @@ const cors = {
 };
 
 createConnection().then(async connection => {
-  server.start({ cors, port: 4000 }, ({ port }) => {
+  server.start({ cors, port: process.env.PORT || 4000 }, ({ port }) => {
     console.log(`Server is running on localhost:${port}`);
   });
 });
