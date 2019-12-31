@@ -36,7 +36,7 @@ server.express.use(
     saveUninitialized: false,
     cookie: {
       secure: process.env.NODE_ENV === "production",
-      maxAge: 1000 * 60 * 60 * 24 * 7 //7days
+      maxAge: 1000 * 60 * 60 * 24 * 7 // 7days
     }
   })
 );
@@ -45,7 +45,7 @@ const cors = {
   origin: [process.env.FRONTEND_HOST as string]
 };
 
-createConnection().then(async connection => {
+createConnection().then(async _connection => {
   server.start({ cors, port: process.env.PORT || 4000 }, ({ port }) => {
     console.log(`Server is running on localhost:${port}`);
   });

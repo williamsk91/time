@@ -1,10 +1,12 @@
+const typeOrmDir = process.env.NODE_ENV === "production" ? "dist" : "src";
+
 const baseConfig = {
   type: "postgres",
   synchronize: true,
   logging: false,
-  entities: ["src/entity/**/*.ts"],
-  migrations: ["src/migration/**/*.ts"],
-  subscribers: ["src/subscriber/**/*.ts"],
+  entities: [`${typeOrmDir}/entity/**/*`],
+  migrations: ["src/migration/**/*.{js, ts}"],
+  subscribers: ["src/subscriber/**/*.{js, ts}"],
   cli: {
     entitiesDir: "src/entity",
     migrationsDir: "src/migration",

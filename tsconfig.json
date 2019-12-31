@@ -1,16 +1,15 @@
 {
   "compilerOptions": {
-    "lib": ["es5", "es6"],
-    "outDir": "build/compiled",
-    "target": "es5",
+    "outDir": "dist",
+    "target": "ESNext",
+    "lib": ["dom", "es6", "es2017", "esnext.asynciterable"],
     "module": "commonjs",
-    "moduleResolution": "node",
+    "moduleResolution": "Node",
     "importHelpers": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "sourceMap": true,
     "noImplicitAny": true,
-    "declaration": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
     "stripInternal": true,
@@ -20,5 +19,5 @@
     "downlevelIteration": true,
     "esModuleInterop": true
   },
-  "exclude": ["tmp", "temp", "build", "node_modules"]
+  "exclude": ["dist", "node_modules"]
 }
