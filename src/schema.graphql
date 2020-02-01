@@ -1,15 +1,31 @@
+type User {
+  id: String!
+  email: String!
+  displayName: String
+}
+
+type PageTitle {
+  id: String!
+  title: String!
+}
+
 type Page {
-  id: String
-  title: String
-  path: [String]
-  content: String
+  id: String!
+  title: String!
+  path: [String!]!
+  content: String!
 }
 
 type Query {
   getPage(id: String!): Page
+  getUserPages: [Page!]!
+  me: User
 }
 
 type Mutation {
-  createPage(path: [String!]!): Page
-  saveContent(pageId: String!, content: String!): String
+  createPage(path: [String!]!): Page!
+  deletePage(pageId: String!): String!
+  savePageTitle(pageId: String!, title: String!): String!
+  saveContent(pageId: String!, content: String!): String!
+  invalidateTokens: Boolean!
 }
