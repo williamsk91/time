@@ -8,15 +8,12 @@ import passport from "passport";
 import { setJWTCookie } from "./JWT";
 
 export const useGoogleOauth = (server: GraphQLServer) => {
-  /**
-   * Oauth
-   */
   passport.use(
     new GoogleStrategy(
       {
         clientID: process.env.GOOGLE_CLIENT_ID as string,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-        callbackURL: "http://localhost:4000/auth/google/callback"
+        callbackURL: "/auth/google/callback"
       },
       async (_accessToken, _refreshToken, profile, cb) => {
         const { id, emails, displayName } = profile;
