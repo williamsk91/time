@@ -21,6 +21,32 @@ First, install dependencies
 yarn
 ```
 
+## Environment and Database setup
+
+Create `.env` file with the following credentials
+
+```
+FRONTEND_HOST=http://localhost:3000
+
+# JWT
+JWT_SECRET=
+
+# Google oauth
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+
+```
+
+Also ensure that a local postgres database is created with credentials specified in `ormconfig.js`. i.e.
+
+```
+  port: 5432,
+  username: "postgres",
+  password: "postgres",
+  database: "ink-db"
+```
+
+
 ## Start development
 
 This will also launch GraphQL playground in [http://localhost:4000/](http://localhost:4000/)
