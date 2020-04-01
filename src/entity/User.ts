@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn
 } from "typeorm";
 
-import { PageToUser } from "./PageToUser";
+import { List } from "./List";
 import uuid from "uuid/v4";
 
 @Entity("users")
@@ -40,8 +40,9 @@ export class User extends BaseEntity {
   createdDate: Date;
 
   @OneToMany(
-    () => PageToUser,
-    pageToUser => pageToUser.user
+    () => List,
+    list => list.user,
+    { cascade: true }
   )
-  pageToUser: PageToUser[];
+  lists: List[];
 }

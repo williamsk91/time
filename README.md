@@ -1,6 +1,6 @@
-# Ink
+# Time
 
-Server side codes for KamiNote
+Server side codes for T2
 
 # Stack
 
@@ -45,7 +45,6 @@ Also ensure that a local postgres database is created with credentials specified
   password: "postgres",
   database: "ink-db"
 ```
-
 
 ## Start development
 

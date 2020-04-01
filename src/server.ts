@@ -43,7 +43,7 @@ const start = async () => {
     credentials: true
   };
 
-  server.start({ cors, port: process.env.PORT || 4000 }, ({ port }) => {
+  server.start({ cors, port: process.env.PORT || 7000 }, ({ port }) => {
     console.log(`🚀  Server is running on localhost:${port}`);
   });
 };

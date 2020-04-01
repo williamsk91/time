@@ -1,11 +1,10 @@
-import { PageAccess, PageToUser } from "./entity/PageToUser";
+import { getConnection, getRepository } from "typeorm";
 
 import { IResolverMap } from "./types/graphql-utils";
-import { Page } from "./entity/Page";
-import { State } from "./entity/State";
+import { List } from "./entity/List";
+import { Task } from "./entity/Task";
 import { User } from "./entity/User";
 import { errors } from "./errors";
-import { getConnection } from "typeorm";
 
 export const resolvers: IResolverMap = {
   Query: {
@@ -13,63 +12,41 @@ export const resolvers: IResolverMap = {
       if (!req.userId) throw errors.notSignedIn;
       return User.findOne(req.userId);
     },
-    getPage: async (_parent, { id }: GQL.IGetPageOnQueryArguments, { req }) => {
-      // find page by id
-      const page = await getConnection()
-        .getRepository(Page)
-        .createQueryBuilder("page")
-        // `State`
-        .leftJoinAndSelect("page.state", "state")
-        // `User` through `PageToUser`
-        .leftJoinAndSelect("page.pageToUser", "pageToUser")
-        .leftJoinAndSelect("pageToUser.user", "user")
-        .where("page.id = :id", { id })
+    list: async (_parent, { id }: GQL.IList, { req }) => {
+      if (!req.userId) throw errors.notSignedIn;
+
+      const list = await getRepository(List)
+        .createQueryBuilder("list")
+        .leftJoinAndSelect("list.user", "user")
+        .leftJoinAndSelect("list.tasks", "task")
+        .where("list.id = :id", { id })
         .getOne();
 
-      if (!page || page.deleted) throw errors.noPageFound;
+      if (!list || list.deleted) throw errors.noListFound;
+      if (list.user.id !== req.userId) throw errors.noListAccess;
 
-      // check `User`'s `PageAccess`
-      if (!req.userId) throw errors.notSignedIn;
-      const pageToUser = page.pageToUser.find(({ user, access }) => {
-        return req.userId === user.id && access === PageAccess.Creator;
-      });
-
-      // user can access this page
-      if (!pageToUser) throw errors.noPageAccess;
-
-      const { title, path } = page;
-      return {
-        id,
-        title,
-        path,
-        content: page.state.content
-      };
+      return list;
     },
-    getUserPages: async (_parent, _args, { req }) => {
-      const userId = req.userId;
+    userList: async (_parent, _args, { req }) => {
       if (!req.userId) throw errors.notSignedIn;
 
-      const pageToUsers = await getConnection()
-        .getRepository(PageToUser)
-        .createQueryBuilder("pageToUser")
-        .leftJoinAndSelect("pageToUser.page", "page")
-        .leftJoinAndSelect("pageToUser.user", "user")
+      const userId = req.userId;
+
+      const userList = await getRepository(List)
+        .createQueryBuilder("list")
+        .leftJoinAndSelect("list.user", "user")
+        .leftJoinAndSelect("list.tasks", "task")
         .where("user.id = :userId", { userId })
-        .andWhere("page.deleted = FALSE")
+        .where("list.deleted = FALSE")
         .getMany();
 
-      const pages = pageToUsers.map(({ page }) => ({
-        id: page.id,
-        title: page.title ? page.title : ""
-      }));
-
-      return pages;
+      return userList;
     }
   },
   Mutation: {
-    createPage: async (
+    createList: async (
       _,
-      { path }: GQL.ICreatePageOnMutationArguments,
+      { title }: GQL.ICreateListOnMutationArguments,
       { req }
     ) => {
       // ensure user is logged in
@@ -79,71 +56,90 @@ export const resolvers: IResolverMap = {
 
       if (!user) throw errors.noUserFound;
 
-      const savedState = await createBasePage(user, path);
-
-      const { content } = savedState;
-      const { id, title } = savedState.page;
-      return {
-        id,
-        title,
-        path,
-        content
-      };
-    },
-    deletePage: async (
-      _,
-      { pageId }: GQL.IDeletePageOnMutationArguments,
-      { req }
-    ) => {
-      // ensure user is logged in
-      if (!req.userId) throw errors.notSignedIn;
-
-      const page = await Page.findOne(pageId);
-      if (!page) throw errors.noPageFound;
-
-      page.deleted = true;
-      await page.save();
-
-      return pageId;
-    },
-    savePageTitle: async (
-      _parent,
-      { pageId, title }: GQL.ISavePageTitleOnMutationArguments,
-      { req }
-    ) => {
-      // verify user
-      if (!req.userId) throw errors.notSignedIn;
-
-      // find page
-      const page = await Page.findOne(pageId);
-      if (!page) throw errors.noPageFound;
-
-      // update title
-      page.title = title;
-      await page.save();
-
-      return title;
-    },
-    saveContent: async (
-      _parent,
-      { pageId, content }: GQL.ISaveContentOnMutationArguments,
-      { req }
-    ) => {
-      // find page
-      const page = await Page.findOne(pageId);
-      if (!page) throw errors.noPageFound;
-
-      // verify user
-      if (!req.userId) throw errors.notSignedIn;
-
-      // save content as new state
-      const newState = State.create({
-        content,
-        page
+      const newTask = Task.create({
+        title: `${title} list first task`
       });
-      const savedState = await newState.save();
 
-      return savedState.id;
+      const newList = List.create({
+        title,
+        tasks: [newTask],
+        user
+      });
+      const list = await newList.save();
+
+      return list;
+    },
+    deleteList: async (
+      _,
+      { id }: GQL.IDeleteListOnMutationArguments,
+      { req }
+    ) => {
+      if (!req.userId) throw errors.notSignedIn;
+
+      const list = await List.findOne(id);
+      if (!list) throw errors.noListFound;
+
+      list.deleted = true;
+      await list.save();
+
+      return list.id;
+    },
+    createTask: async (
+      _parent,
+      { listId, task: partialTask }: GQL.ICreateTaskOnMutationArguments,
+      { req }
+    ) => {
+      if (!req.userId) throw errors.notSignedIn;
+
+      const list = await List.findOne(listId);
+      if (!list) throw errors.noListFound;
+
+      const { done, title, start } = partialTask;
+      const newTask = Task.create({
+        done: done ? new Date(done) : undefined,
+        title,
+        start: start ? new Date(start) : undefined,
+        list
+      });
+      const task = await newTask.save();
+      console.log("task: ", task);
+
+      return task;
+    },
+    updateTask: async (
+      _parent,
+      { task: partialTask }: GQL.IUpdateTaskOnMutationArguments,
+      { req }
+    ) => {
+      if (!req.userId) throw errors.notSignedIn;
+
+      // find task
+      const task = await getRepository(Task)
+        .createQueryBuilder("task")
+        .leftJoinAndSelect("task.list", "list")
+        .leftJoinAndSelect("list.user", "user")
+        .where("task.id = :taskId", { taskId: partialTask.id })
+        .where("user.id = :userId", { userId: req.userId })
+        .where("list.deleted = FALSE")
+        .getOne();
+
+      console.log("task: ", task);
+
+      if (!task) throw errors.noTaskFound;
+      if (task.list.user.id !== req.userId) throw errors.noTaskAccess;
+
+      await getConnection()
+        .createQueryBuilder()
+        .update(Task)
+        .set({
+          done: partialTask.done ? new Date(partialTask.done) : undefined,
+          title: partialTask.title,
+          start: partialTask.start ? new Date(partialTask.start) : undefined
+        })
+        .where("id = :id", { id: partialTask.id })
+        .execute();
+
+      return partialTask;
     },
     invalidateTokens: async (_, __, { req, res }) => {
       if (!req.userId) return false;
@@ -161,47 +157,4 @@ export const resolvers: IResolverMap = {
       return true;
     }
   }
-};
-
-// ------------------------- Helpers -------------------------
-
-export const createBasePage = async (
-  user: User,
-  path: string[],
-  title: string = "",
-  content: string = ""
-) => {
-  /**
-   * PageToUser
-   */
-  const pageToUser = PageToUser.create({
-    user,
-    access: PageAccess.Creator
-  });
-
-  /**
-   * `Page`
-   */
-  const page = Page.create({
-    path,
-    title,
-    // connect user
-    pageToUser: [pageToUser]
-  });
-
-  /**
-   * `State`
-   */
-  const newState = State.create({
-    content,
-    // connect state and page
-    page
-  });
-
-  /**
-   * Saving
-   */
-  const savedState = await newState.save();
-
-  return savedState;
 };

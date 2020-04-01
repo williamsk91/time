@@ -22,21 +22,28 @@ column: number;
 
 interface IQuery {
 __typename: "Query";
-getPage: IPage | null;
-getUserPages: Array<IPage>;
+list: IList;
+userList: Array<IList>;
 me: IUser | null;
 }
 
-interface IGetPageOnQueryArguments {
+interface IListOnQueryArguments {
 id: string;
 }
 
-interface IPage {
-__typename: "Page";
+interface IList {
+__typename: "List";
 id: string;
 title: string;
-path: Array<string>;
-content: string;
+tasks: Array<ITask>;
+}
+
+interface ITask {
+__typename: "Task";
+id: string;
+done: string | null;
+title: string;
+start: string | null;
 }
 
 interface IUser {
@@ -48,35 +55,41 @@ displayName: string | null;
 
 interface IMutation {
 __typename: "Mutation";
-createPage: IPage;
-deletePage: string;
-savePageTitle: string;
-saveContent: string;
+createList: IList;
+deleteList: string;
+createTask: ITask;
+updateTask: ITask;
 invalidateTokens: boolean;
 }
 
-interface ICreatePageOnMutationArguments {
-path: Array<string>;
-}
-
-interface IDeletePageOnMutationArguments {
-pageId: string;
-}
-
-interface ISavePageTitleOnMutationArguments {
-pageId: string;
+interface ICreateListOnMutationArguments {
 title: string;
 }
 
-interface ISaveContentOnMutationArguments {
-pageId: string;
-content: string;
-}
-
-interface IPageTitle {
-__typename: "PageTitle";
+interface IDeleteListOnMutationArguments {
 id: string;
+}
+
+interface ICreateTaskOnMutationArguments {
+listId: string;
+task: ICreateTaskInput;
+}
+
+interface IUpdateTaskOnMutationArguments {
+task: IUpdateTaskInput;
+}
+
+interface ICreateTaskInput {
+done?: string | null;
 title: string;
+start?: string | null;
+}
+
+interface IUpdateTaskInput {
+id: string;
+done?: string | null;
+title: string;
+start?: string | null;
 }
 }
 

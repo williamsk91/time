@@ -4,28 +4,42 @@ type User {
   displayName: String
 }
 
-type PageTitle {
-  id: String!
+type List {
+  id: ID!
   title: String!
+  tasks: [Task!]!
 }
 
-type Page {
-  id: String!
+type Task {
+  id: ID!
+  done: String
   title: String!
-  path: [String!]!
-  content: String!
+  start: String
 }
 
 type Query {
-  getPage(id: String!): Page
-  getUserPages: [Page!]!
+  list(id: ID!): List!
+  userList: [List!]!
   me: User
 }
 
+input CreateTaskInput {
+  done: String
+  title: String!
+  start: String
+}
+
+input UpdateTaskInput {
+  id: ID!
+  done: String
+  title: String!
+  start: String
+}
+
 type Mutation {
-  createPage(path: [String!]!): Page!
-  deletePage(pageId: String!): String!
-  savePageTitle(pageId: String!, title: String!): String!
-  saveContent(pageId: String!, content: String!): String!
+  createList(title: String!): List!
+  deleteList(id: ID!): String!
+  createTask(listId: ID!, task: CreateTaskInput!): Task!
+  updateTask(task: UpdateTaskInput!): Task!
   invalidateTokens: Boolean!
 }

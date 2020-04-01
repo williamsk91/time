@@ -20,7 +20,7 @@ const localConfig = {
   port: 5432,
   username: "postgres",
   password: "postgres",
-  database: "ink-db"
+  database: "timelog"
 };
 
 const prodConfig = process.env.DATABASE_URL && {
