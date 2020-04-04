@@ -7,7 +7,7 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
 } from "typeorm";
 
 import { Task } from "./Task";
@@ -27,17 +27,13 @@ export class List extends BaseEntity {
   @Column("varchar", { length: 255, unique: true })
   title: string;
 
-  @OneToMany(
-    () => Task,
-    task => task.list,
-    { cascade: true }
-  )
+  @OneToMany(() => Task, (task) => task.list, { cascade: true })
   tasks: Task[];
 
-  @ManyToOne(
-    () => User,
-    user => user.lists
-  )
+  @Column("integer", { default: 0 })
+  taskCreated: number;
+
+  @ManyToOne(() => User, (user) => user.lists)
   user: User;
 
   @Column("boolean", { default: false })

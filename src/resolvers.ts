@@ -20,6 +20,7 @@ export const resolvers: IResolverMap = {
         .leftJoinAndSelect("list.user", "user")
         .leftJoinAndSelect("list.tasks", "task")
         .where("list.id = :id", { id })
+        .orderBy("task.order")
         .getOne();
 
       if (!list || list.deleted) throw errors.noListFound;
@@ -41,7 +42,7 @@ export const resolvers: IResolverMap = {
         .getMany();
 
       return userList;
-    }
+    },
   },
   Mutation: {
     createList: async (
@@ -57,13 +58,13 @@ export const resolvers: IResolverMap = {
       if (!user) throw errors.noUserFound;
 
       const newTask = Task.create({
-        title: `${title} list first task`
+        title: `${title} list first task`,
       });
 
       const newList = List.create({
         title,
         tasks: [newTask],
-        user
+        user,
       });
       const list = await newList.save();
 
@@ -94,15 +95,22 @@ export const resolvers: IResolverMap = {
       const list = await List.findOne(listId);
       if (!list) throw errors.noListFound;
 
+      list.taskCreated++;
+      const taskOrder = list.taskCreated;
       const { done, title, start } = partialTask;
       const newTask = Task.create({
-        done: done ? new Date(done) : undefined,
+        done: done ? done : undefined,
         title,
-        start: start ? new Date(start) : undefined,
-        list
+        start: start ? start : undefined,
+        order: taskOrder,
+        list,
       });
-      const task = await newTask.save();
-      console.log("task: ", task);
+
+      let task;
+      await getConnection().transaction(async (transactionEntityManager) => {
+        await transactionEntityManager.save(list);
+        task = await transactionEntityManager.save(newTask);
+      });
 
       return task;
     },
@@ -123,8 +131,6 @@ export const resolvers: IResolverMap = {
         .where("list.deleted = FALSE")
         .getOne();
 
-      console.log("task: ", task);
-
       if (!task) throw errors.noTaskFound;
       if (task.list.user.id !== req.userId) throw errors.noTaskAccess;
 
@@ -132,9 +138,9 @@ export const resolvers: IResolverMap = {
         .createQueryBuilder()
         .update(Task)
         .set({
-          done: partialTask.done ? new Date(partialTask.done) : undefined,
+          done: partialTask.done ? partialTask.done : undefined,
           title: partialTask.title,
-          start: partialTask.start ? new Date(partialTask.start) : undefined
+          start: partialTask.start ? partialTask.start : undefined,
         })
         .where("id = :id", { id: partialTask.id })
         .execute();
@@ -155,6 +161,6 @@ export const resolvers: IResolverMap = {
       res.clearCookie("access-token");
 
       return true;
-    }
-  }
+    },
+  },
 };

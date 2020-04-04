@@ -6,7 +6,7 @@ import {
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
 } from "typeorm";
 
 import { List } from "./List";
@@ -22,23 +22,23 @@ export class Task extends BaseEntity {
     this.id = uuid();
   };
 
-  @Column({
-    nullable: true
+  @Column("timestamp with time zone", {
+    nullable: true,
   })
-  done: Date;
+  done: string;
 
   @Column("varchar")
   title: string;
 
-  @Column({
-    nullable: true
+  @Column("timestamp with time zone", {
+    nullable: true,
   })
-  start: Date;
+  start: string;
 
-  @ManyToOne(
-    () => List,
-    list => list.tasks
-  )
+  @Column("integer", {})
+  order: number;
+
+  @ManyToOne(() => List, (list) => list.tasks)
   list: List;
 
   // ------------------------- extra column -------------------------
