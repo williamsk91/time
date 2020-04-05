@@ -44,6 +44,7 @@ id: string;
 done: string | null;
 title: string;
 start: string | null;
+hasTime: boolean;
 }
 
 interface IUser {
@@ -90,6 +91,7 @@ id: string;
 done?: string | null;
 title: string;
 start?: string | null;
+hasTime: boolean;
 }
 }
 

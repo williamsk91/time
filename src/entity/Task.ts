@@ -35,6 +35,10 @@ export class Task extends BaseEntity {
   })
   start: string;
 
+  // whether the dates should include time or not
+  @Column("boolean", { default: false })
+  hasTime: boolean;
+
   @Column("integer", {})
   order: number;
 

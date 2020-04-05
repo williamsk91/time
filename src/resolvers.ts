@@ -138,6 +138,7 @@ export const resolvers: IResolverMap = {
         .createQueryBuilder()
         .update(Task)
         .set({
+          ...partialTask,
           done: partialTask.done ? partialTask.done : undefined,
           title: partialTask.title,
           start: partialTask.start ? partialTask.start : undefined,
