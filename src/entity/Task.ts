@@ -22,7 +22,7 @@ export class Task extends BaseEntity {
     this.id = uuid();
   };
 
-  @Column("timestamp with time zone", {
+  @Column("varchar", {
     nullable: true,
   })
   done: string;
@@ -30,7 +30,7 @@ export class Task extends BaseEntity {
   @Column("varchar")
   title: string;
 
-  @Column("timestamp with time zone", {
+  @Column("varchar", {
     nullable: true,
   })
   start: string;
