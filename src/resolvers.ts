@@ -86,7 +86,7 @@ export const resolvers: IResolverMap = {
       return list.id;
     },
     createTask: async (
-      _parent,
+      _,
       { listId, task: partialTask }: GQL.ICreateTaskOnMutationArguments,
       { req }
     ) => {
@@ -127,8 +127,8 @@ export const resolvers: IResolverMap = {
         .leftJoinAndSelect("task.list", "list")
         .leftJoinAndSelect("list.user", "user")
         .where("task.id = :taskId", { taskId: partialTask.id })
-        .where("user.id = :userId", { userId: req.userId })
-        .where("list.deleted = FALSE")
+        .andWhere("user.id = :userId", { userId: req.userId })
+        .andWhere("list.deleted = FALSE")
         .getOne();
 
       if (!task) throw errors.noTaskFound;
