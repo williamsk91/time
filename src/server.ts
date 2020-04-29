@@ -1,9 +1,8 @@
 import "reflect-metadata";
 
 import { ApolloServer } from "apollo-server";
-import { TaskResolver } from "./resolvers/task";
-import { UserResolver } from "./resolvers/user";
 import { buildSchema } from "type-graphql";
+import { createConnection } from "typeorm";
 
 // import cookieParser = require("cookie-parser");
 
@@ -18,8 +17,6 @@ import { buildSchema } from "type-graphql";
 //     res: response
 //   })
 // });
-
-// await createConnection();
 
 // server.express.use(cookieParser());
 // server.express.use(JWTMiddleware());
@@ -40,17 +37,33 @@ import { buildSchema } from "type-graphql";
 
 const PORT = process.env.PORT || 4000;
 
+export interface Context {
+  user: {
+    id: string;
+  };
+}
+
 async function bootstrap() {
   const schema = await buildSchema({
-    resolvers: [TaskResolver, UserResolver],
+    resolvers: [__dirname + "/resolvers/*.ts"],
     emitSchemaFile: true
   });
 
   // Create the GraphQL server
   const server = new ApolloServer({
     schema,
+    context: ({ req, res }): Context => {
+      return {
+        user: {
+          id: "27ef2905-7469-49ca-9c4b-f95755e28652"
+        }
+      };
+    },
+
     playground: true
   });
+
+  await createConnection();
 
   // Start the server
   const { url } = await server.listen(PORT);
