@@ -14,8 +14,8 @@ type Mutation {
 }
 
 type Query {
-  tasks: [Task!]!
   me: User!
+  tasks: [Task!]!
 }
 
 type Task {

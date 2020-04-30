@@ -7,9 +7,7 @@ beforeAll(async () => {
   conn = await testConn();
 });
 
-afterAll(async () => {
-  await conn.close();
-});
+afterAll(async () => await conn.close());
 
 it("createTask", async () => {
   const title = "new task title";
