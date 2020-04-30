@@ -1,9 +1,11 @@
 {
-  "name": "ink",
+  "name": "time",
   "version": "0.0.1",
-  "description": "Awesome project developed with TypeORM.",
+  "description": "GraphQL server for T2 - Calendar & Task",
+  "private": true,
   "devDependencies": {
     "@types/cookie-parser": "^1.4.2",
+    "@types/jest": "^25.2.1",
     "@types/jsonwebtoken": "^8.3.5",
     "@types/node": "^13.1.0",
     "@types/node-fetch": "^2.5.4",
@@ -11,6 +13,8 @@
     "@types/passport-google-oauth20": "^2.0.3",
     "@types/uuid": "^3.4.6",
     "@types/ws": "^6.0.4",
+    "jest": "^25.5.1",
+    "ts-jest": "^25.4.0",
     "ts-node-dev": "^1.0.0-pre.44",
     "typescript": "3.7.4"
   },
@@ -31,9 +35,8 @@
     "uuid": "^3.3.3"
   },
   "scripts": {
-    "dev": "ts-node-dev --no-notify -r dotenv/config --files src/server.ts",
-    "test-prod": "NODE_ENV=production node -r dotenv/config dist/server.js",
-    "build": "rimraf dist && tsc",
-    "postinstall": "yarn build"
+    "dev": "ts-node-dev --no-notify -r dotenv/config src/server.ts",
+    "db:setup": "ts-node ./src/test-utils/setup.ts",
+    "test": "yarn db:setup && jest --watch"
   }
 }

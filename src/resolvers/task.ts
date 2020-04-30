@@ -65,19 +65,16 @@ async function getUserTasks(userId: string): Promise<Task[]> {
 async function createTask(userId: string, title: string): Promise<Task> {
   const user = await User.getById(userId);
   if (!user) throw UserNotFoundError;
-  console.log("user.tasks: ", user.tasks);
-  const task = Task.create({ title });
-  user.tasks = [...(user.tasks ?? []), task];
-  await user.save();
+
+  const task = Task.create({ title, user });
+  await task.save();
 
   return task;
 }
 
 async function updateTask(task: UpdateTaskInput): Promise<Task> {
-  const update = await Task.update(task.id, task);
-  console.log("update: ", update);
+  await Task.update(task.id, task);
   const updatedTask = await Task.getById(task.id);
-  console.log("updatedTask: ", updatedTask);
   if (!updatedTask) throw TaskNotFoundError;
   return updatedTask;
 }

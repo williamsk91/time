@@ -13,3 +13,11 @@ export class UserResolver {
     return userData;
   }
 }
+
+// ------------------------- Business logic -------------------------
+
+export const createUser = async ({
+  email
+}: Pick<User, "email">): Promise<User> => {
+  return await User.create({ email }).save();
+};

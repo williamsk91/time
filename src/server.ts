@@ -1,8 +1,8 @@
 import "reflect-metadata";
 
 import { ApolloServer } from "apollo-server";
-import { buildSchema } from "type-graphql";
 import { createConnection } from "typeorm";
+import { createSchema } from "./graphql/schema";
 
 // import cookieParser = require("cookie-parser");
 
@@ -44,10 +44,7 @@ export interface Context {
 }
 
 async function bootstrap() {
-  const schema = await buildSchema({
-    resolvers: [__dirname + "/resolvers/*.ts"],
-    emitSchemaFile: true
-  });
+  const schema = await createSchema();
 
   // Create the GraphQL server
   const server = new ApolloServer({
