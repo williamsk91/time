@@ -17,11 +17,14 @@ export class User extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column()
+  @Column({ unique: true })
   email: string;
 
-  @Column({ nullable: true })
+  @Column({ unique: true, nullable: true })
   googleId?: string;
+
+  @Column({ default: 0 })
+  count: number;
 
   // ------------------------- relation -------------------------
   @OneToMany(() => Task, task => task.user, { cascade: true })

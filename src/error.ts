@@ -1,6 +1,8 @@
-import { ApolloError, UserInputError } from "apollo-server";
-
-import { AuthenticationError } from "apollo-server-errors";
+import {
+  ApolloError,
+  AuthenticationError,
+  UserInputError
+} from "apollo-server-errors";
 
 export type ServerError = ApolloError;
 

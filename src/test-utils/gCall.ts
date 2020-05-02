@@ -1,6 +1,7 @@
 import { GraphQLSchema, graphql } from "graphql";
+import { mockRequest, mockResponse } from "mock-req-res";
 
-import { Context } from "../server";
+import { AuthorizedContext } from "../authorization/authChecker";
 import { Maybe } from "type-graphql";
 import { createSchema } from "../graphql/schema";
 import { createUser } from "../resolvers/user";
@@ -10,10 +11,10 @@ interface Options {
   variableValues?: Maybe<{
     [key: string]: any;
   }>;
-  context?: Context;
+  context?: AuthorizedContext;
 }
 
-let defaultContext: Context;
+let defaultContext: AuthorizedContext;
 let schema: GraphQLSchema;
 
 /**
@@ -26,7 +27,9 @@ export const gCall = async ({ source, variableValues, context }: Options) => {
 
   if (!context && !defaultContext) {
     const user = await createUser({ email: "testUserEmail" });
-    defaultContext = { user: { id: user.id } };
+    const req = mockRequest();
+    const res = mockResponse();
+    defaultContext = { user: { id: user.id }, req, res };
   }
 
   return graphql({

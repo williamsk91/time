@@ -6,12 +6,13 @@ import {
   Mutation,
   Arg,
   InputType,
-  Ctx
+  Ctx,
+  Authorized
 } from "type-graphql";
 import { Task } from "../entity/task";
 import { User } from "../entity/user";
-import { Context } from "../server";
-import { UserNotFoundError, TaskNotFoundError } from "./error";
+import { AuthorizedContext } from "../authorization/authChecker";
+import { UserNotFoundError, TaskNotFoundError } from "../error";
 
 @InputType({ description: "New task data" })
 class UpdateTaskInput implements Partial<Task> {
@@ -36,19 +37,22 @@ class UpdateTaskInput implements Partial<Task> {
 
 @Resolver()
 export class TaskResolver {
+  @Authorized()
   @Query(_returns => [Task])
-  async tasks(@Ctx() { user }: Context): Promise<Task[]> {
+  async tasks(@Ctx() { user }: AuthorizedContext): Promise<Task[]> {
     return getUserTasks(user.id);
   }
 
+  @Authorized()
   @Mutation(_returns => Task)
   async createTask(
     @Arg("title") title: string,
-    @Ctx() { user }: Context
+    @Ctx() { user }: AuthorizedContext
   ): Promise<Task> {
     return await createTask(user.id, title);
   }
 
+  @Authorized()
   @Mutation(_returns => Task)
   async updateTask(@Arg("task") task: UpdateTaskInput): Promise<Task> {
     return await updateTask(task);

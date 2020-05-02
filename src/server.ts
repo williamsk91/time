@@ -1,70 +1,62 @@
 import "reflect-metadata";
 
-import { ApolloServer } from "apollo-server";
+import { ApolloServer } from "apollo-server-express";
+import { JWTMiddleware } from "./authorization/JWT";
+import cookieParser from "cookie-parser";
+import cors from "cors";
 import { createConnection } from "typeorm";
 import { createSchema } from "./graphql/schema";
-
-// import cookieParser = require("cookie-parser");
-
-/**
- * GraphQL server
- */
-// const server = new GraphQLServer({
-//   schema,
-//   context: ({ request, response }): IContext => ({
-//     url: request.protocol + "://" + request.get("host"),
-//     req: request,
-//     res: response
-//   })
-// });
-
-// server.express.use(cookieParser());
-// server.express.use(JWTMiddleware());
-
-/**
- * Oauth
- * note: has to be under the above `await createConnection()`
- */
-// useGoogleOauth(server);
-
-/**
- * Cors
- */
-// const cors = {
-//   origin: [process.env.FRONTEND_HOST as string, "https://app.kaminote.io"],
-//   credentials: true
-// };
+import express from "express";
+import { useGoogleOauth } from "./authorization/google";
 
 const PORT = process.env.PORT || 4000;
 
-export interface Context {
+export interface PreAuthorizedContext {
   user: {
-    id: string;
+    id?: string;
   };
+  req: express.Request;
+  res: express.Response;
 }
 
 async function bootstrap() {
+  await createConnection();
+  const app = express();
+
+  app.use(cookieParser());
+  app.use(JWTMiddleware());
+  app.use(
+    cors({ origin: [process.env.FRONTEND_HOST as string], credentials: true })
+  );
+  useGoogleOauth(app);
+
   const schema = await createSchema();
 
   // Create the GraphQL server
   const server = new ApolloServer({
     schema,
-    context: ({ req, res }): Context => {
+    context: ({ req, res }): PreAuthorizedContext => {
       return {
+        req,
+        res,
         user: {
-          id: "27ef2905-7469-49ca-9c4b-f95755e28652"
+          id: req.userId
         }
       };
-    },
-
-    playground: true
+    }
   });
 
-  await createConnection();
+  server.applyMiddleware({
+    app,
+    cors: false
+  });
 
   // Start the server
-  const { url } = await server.listen(PORT);
-  console.log(`Server is running, GraphQL Playground available at ${url}`);
+  app.listen({ port: PORT }, () =>
+    console.log(
+      `Server is running, GraphQL Playground available at http://localhost:${PORT}/graphql`
+    )
+  );
 }
 
 bootstrap();
