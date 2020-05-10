@@ -13,6 +13,7 @@ import { Task } from "../entity/task";
 import { User } from "../entity/user";
 import { AuthorizedContext } from "../authorization/authChecker";
 import { UserNotFoundError, TaskNotFoundError } from "../error";
+import { getRepository } from "typeorm";
 
 @InputType({ description: "New task data" })
 class UpdateTaskInput implements Partial<Task> {
@@ -40,7 +41,12 @@ export class TaskResolver {
   @Authorized()
   @Query(_returns => [Task])
   async tasks(@Ctx() { user }: AuthorizedContext): Promise<Task[]> {
-    return getUserTasks(user.id);
+    return getRepository(Task)
+      .createQueryBuilder("task")
+      .leftJoin("task.user", "user")
+      .where("user.id = :id", { id: user.id })
+      .andWhere("task.done = false")
+      .getMany();
   }
 
   @Authorized()
@@ -60,11 +66,6 @@ export class TaskResolver {
 }
 
 // ------------------------- Business logic -------------------------
-
-async function getUserTasks(userId: string): Promise<Task[]> {
-  const user = await User.getById(userId, ["tasks"]);
-  return user?.tasks ?? [];
-}
 
 async function createTask(userId: string, title: string): Promise<Task> {
   const user = await User.getById(userId);

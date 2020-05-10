@@ -1,13 +1,11 @@
-import { Connection } from "typeorm";
 import { gCall } from "../test-utils/gCall";
+import { getConnection } from "typeorm";
 import { testConn } from "../test-utils/testConn";
 
-let conn: Connection;
 beforeAll(async () => {
-  conn = await testConn();
+  await testConn(true);
 });
-
-afterAll(async () => await conn.close());
+afterAll(async () => await getConnection().close());
 
 it("createTask", async () => {
   const title = "new task title";
