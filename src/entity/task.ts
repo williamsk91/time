@@ -3,6 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Generated,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn
@@ -37,6 +38,11 @@ export class Task extends BaseEntity {
   @Field()
   @Column({ default: false })
   includeTime: boolean;
+
+  @Field()
+  @Column()
+  @Generated("increment")
+  order: number;
 
   // ------------------------- relation -------------------------
   @ManyToOne(() => User, user => user.tasks)

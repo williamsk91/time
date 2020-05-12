@@ -26,6 +26,7 @@ type Task {
   start: DateTime
   end: DateTime
   includeTime: Boolean!
+  order: Float!
 }
 
 """New task data"""

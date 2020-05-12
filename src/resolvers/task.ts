@@ -46,6 +46,7 @@ export class TaskResolver {
       .leftJoin("task.user", "user")
       .where("user.id = :id", { id: user.id })
       .andWhere("task.done = false")
+      .orderBy("task.order", "ASC")
       .getMany();
   }
 
