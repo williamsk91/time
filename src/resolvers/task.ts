@@ -13,7 +13,7 @@ import { Task } from "../entity/task";
 import { User } from "../entity/user";
 import { AuthorizedContext } from "../authorization/authChecker";
 import { UserNotFoundError, TaskNotFoundError } from "../error";
-import { getRepository } from "typeorm";
+import { getRepository, getConnection } from "typeorm";
 
 @InputType({ description: "New task data" })
 class UpdateTaskInput implements Partial<Task> {
@@ -63,6 +63,24 @@ export class TaskResolver {
   @Mutation(_returns => Task)
   async updateTask(@Arg("task") task: UpdateTaskInput): Promise<Task> {
     return await updateTask(task);
+  }
+
+  @Authorized()
+  @Mutation(_returns => Boolean)
+  async updateTaskOrder(
+    @Arg("taskOneId") taskOneId: string,
+    @Arg("taskTwoId") taskTwoId: string
+  ): Promise<boolean> {
+    await getConnection().transaction(async transManager => {
+      const taskOne = await Task.getById(taskOneId);
+      const taskTwo = await Task.getById(taskTwoId);
+      if (!taskOne || !taskTwo) throw TaskNotFoundError;
+
+      await transManager.save(Task, { ...taskOne, order: taskTwo.order });
+      await transManager.save(Task, { ...taskTwo, order: taskOne.order });
+    });
+
+    return true;
   }
 }
 

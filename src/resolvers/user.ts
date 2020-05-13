@@ -16,10 +16,10 @@ export class UserResolver {
   }
 
   @Authorized()
-  @Mutation(_return => User)
+  @Mutation(_return => Boolean)
   async invalidateTokens(
     @Ctx() { user: { id }, res }: AuthorizedContext
-  ): Promise<User> {
+  ): Promise<boolean> {
     // updates count
     const userData = await User.getById(id);
     if (!userData) throw UserNotFoundError;
@@ -29,7 +29,7 @@ export class UserResolver {
     // clear cookies
     clearJWTCookie(res);
 
-    return userData;
+    return true;
   }
 }
 
