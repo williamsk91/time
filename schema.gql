@@ -12,7 +12,7 @@ type Mutation {
   invalidateTokens: Boolean!
   createTask(title: String!): Task!
   updateTask(task: UpdateTaskInput!): Task!
-  updateTaskOrder(taskTwoId: String!, taskOneId: String!): Boolean!
+  taskReorder(tasks: [TaskReorderInput!]!): [TaskReorder!]!
 }
 
 type Query {
@@ -30,6 +30,16 @@ type Task {
   order: Float!
 }
 
+type TaskReorder {
+  id: ID!
+  order: Float!
+}
+
+input TaskReorderInput {
+  id: ID!
+  order: Float!
+}
+
 """New task data"""
 input UpdateTaskInput {
   id: ID!
@@ -38,6 +48,7 @@ input UpdateTaskInput {
   start: DateTime
   end: DateTime
   includeTime: Boolean!
+  order: Float!
 }
 
 type User {

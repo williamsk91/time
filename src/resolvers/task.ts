@@ -7,7 +7,8 @@ import {
   Arg,
   InputType,
   Ctx,
-  Authorized
+  Authorized,
+  ObjectType
 } from "type-graphql";
 import { Task } from "../entity/task";
 import { User } from "../entity/user";
@@ -34,6 +35,27 @@ class UpdateTaskInput implements Partial<Task> {
 
   @Field()
   includeTime: boolean;
+
+  @Field()
+  order: number;
+}
+
+@ObjectType()
+class TaskReorder implements Partial<Task> {
+  @Field(_type => ID)
+  id: string;
+
+  @Field()
+  order: number;
+}
+
+@InputType()
+class TaskReorderInput implements Partial<Task> {
+  @Field(_type => ID)
+  id: string;
+
+  @Field()
+  order: number;
 }
 
 @Resolver()
@@ -66,21 +88,12 @@ export class TaskResolver {
   }
 
   @Authorized()
-  @Mutation(_returns => Boolean)
-  async updateTaskOrder(
-    @Arg("taskOneId") taskOneId: string,
-    @Arg("taskTwoId") taskTwoId: string
-  ): Promise<boolean> {
-    await getConnection().transaction(async transManager => {
-      const taskOne = await Task.getById(taskOneId);
-      const taskTwo = await Task.getById(taskTwoId);
-      if (!taskOne || !taskTwo) throw TaskNotFoundError;
-
-      await transManager.save(Task, { ...taskOne, order: taskTwo.order });
-      await transManager.save(Task, { ...taskTwo, order: taskOne.order });
-    });
-
-    return true;
+  @Mutation(_returns => [TaskReorder])
+  async taskReorder(
+    @Arg("tasks", _ => [TaskReorderInput])
+    taskReorderInput: TaskReorderInput[]
+  ): Promise<TaskReorder[]> {
+    return taskReorderTransaction(taskReorderInput);
   }
 }
 
@@ -102,3 +115,32 @@ async function updateTask(task: UpdateTaskInput): Promise<Task> {
   if (!updatedTask) throw TaskNotFoundError;
   return updatedTask;
 }
+
+/**
+ * Reorders task by cycling the order of the tasks.
+ * Returns the updated task id with their new orders.
+ */
+async function taskReorderTransaction(
+  taskReorder: TaskReorder[]
+): Promise<TaskReorder[]> {
+  const shiftedOrder = cycleArray(taskReorder);
+  await getConnection().transaction(async transManager => {
+    const maps = taskReorder.map(
+      async ({ id }, i) =>
+        await transManager
+          .createQueryBuilder()
+          .update(Task)
+          .set({ order: shiftedOrder[i].order })
+          .where("id = :id", { id })
+          .execute()
+    );
+    await Promise.all(maps);
+  });
+  return taskReorder.map((t, i) => ({ ...t, order: shiftedOrder[i].order }));
+}
+
+/**
+ * Cycles the element of the array
+ */
+const cycleArray = <T>(array: T[]): T[] =>
+  array.map((_, i, a) => a[i + 1 === a.length ? 0 : i + 1]);
