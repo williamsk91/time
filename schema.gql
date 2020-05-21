@@ -9,7 +9,7 @@ The javascript `Date` as string. Type represents date and time as the ISO Date s
 scalar DateTime
 
 type Mutation {
-  invalidateTokens: Boolean!
+  signOut: Boolean!
   createTask(title: String!): Task!
   updateTask(task: UpdateTaskInput!): Task!
   taskReorder(tasks: [TaskReorderInput!]!): [TaskReorder!]!

@@ -68,7 +68,7 @@ export const useGoogleOauth = (app: Express) => {
       setJWTCookie(res, (req as any).user);
 
       // redirect to frontend -> page
-      res.redirect(`${process.env.FRONTEND_HOST}`);
+      res.redirect(`${process.env.FRONTEND_HOST}/login`);
     }
   );
 };

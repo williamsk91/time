@@ -17,7 +17,7 @@ export class UserResolver {
 
   @Authorized()
   @Mutation(_return => Boolean)
-  async invalidateTokens(
+  async signOut(
     @Ctx() { user: { id }, res }: AuthorizedContext
   ): Promise<boolean> {
     // updates count
