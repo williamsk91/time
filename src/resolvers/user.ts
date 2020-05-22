@@ -31,6 +31,25 @@ export class UserResolver {
 
     return true;
   }
+
+  @Authorized()
+  @Mutation(_return => Boolean, {
+    description: "Danger! Deletes a user account."
+  })
+  async deleteUser(
+    @Ctx() { user: { id }, res }: AuthorizedContext
+  ): Promise<boolean> {
+    const userData = await User.getById(id);
+    if (!userData) throw UserNotFoundError;
+
+    userData.count += 1;
+    userData.deleted = new Date();
+    const updated = await userData.save();
+
+    // clear cookies
+    clearJWTCookie(res);
+    return !!updated;
+  }
 }
 
 // ------------------------- Business logic -------------------------

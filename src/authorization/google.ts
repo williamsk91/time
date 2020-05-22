@@ -32,6 +32,13 @@ export const useGoogleOauth = (app: Express) => {
         let user = await query.getOne();
 
         /**
+         * User has been deleted
+         */
+        if (user?.deleted) {
+          return cb(undefined, false, { messages: "deleted user" });
+        }
+
+        /**
          * Update user depending on user status
          */
         if (!user) {
@@ -63,7 +70,10 @@ export const useGoogleOauth = (app: Express) => {
 
   app.get(
     "/auth/google/callback",
-    passport.authenticate("google", { session: false }),
+    passport.authenticate("google", {
+      session: false,
+      failureRedirect: `${process.env.FRONTEND_HOST}/login`
+    }),
     (req, res) => {
       setJWTCookie(res, (req as any).user);
 

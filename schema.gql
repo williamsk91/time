@@ -10,6 +10,9 @@ scalar DateTime
 
 type Mutation {
   signOut: Boolean!
+
+  """Danger! Deletes a user account."""
+  deleteUser: Boolean!
   createTask(title: String!): Task!
   updateTask(task: UpdateTaskInput!): Task!
   taskReorder(tasks: [TaskReorderInput!]!): [TaskReorder!]!

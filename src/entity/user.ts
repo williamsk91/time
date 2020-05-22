@@ -26,6 +26,9 @@ export class User extends BaseEntity {
   @Column({ default: 0 })
   count: number;
 
+  @Column({ default: null })
+  deleted?: Date;
+
   // ------------------------- relation -------------------------
   @OneToMany(() => Task, task => task.user, { cascade: true })
   tasks: Task[];
