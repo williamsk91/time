@@ -21,12 +21,13 @@ type Mutation {
 type Query {
   me: User!
   tasks: [Task!]!
+  completedTasks: [Task!]!
 }
 
 type Task {
   id: ID!
   title: String!
-  done: Boolean!
+  done: DateTime
   start: DateTime
   end: DateTime
   includeTime: Boolean!
@@ -47,7 +48,7 @@ input TaskReorderInput {
 input UpdateTaskInput {
   id: ID!
   title: String!
-  done: Boolean!
+  done: DateTime
   start: DateTime
   end: DateTime
   includeTime: Boolean!

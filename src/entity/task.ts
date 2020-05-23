@@ -23,16 +23,16 @@ export class Task extends BaseEntity {
   @Column()
   title: String;
 
-  @Field()
-  @Column({ default: false })
-  done: boolean;
+  @Field({ nullable: true })
+  @Column({ default: null })
+  done?: Date;
 
   @Field({ nullable: true })
-  @Column({ nullable: true, default: null })
+  @Column({ default: null })
   start?: Date;
 
   @Field({ nullable: true })
-  @Column({ nullable: true, default: null })
+  @Column({ default: null })
   end?: Date;
 
   @Field()

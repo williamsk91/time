@@ -24,8 +24,8 @@ class UpdateTaskInput implements Partial<Task> {
   @Field()
   title: String;
 
-  @Field()
-  done: boolean;
+  @Field({ nullable: true })
+  done?: Date;
 
   @Field({ nullable: true })
   start?: Date;
@@ -67,8 +67,21 @@ export class TaskResolver {
       .createQueryBuilder("task")
       .leftJoin("task.user", "user")
       .where("user.id = :id", { id: user.id })
-      .andWhere("task.done = false")
+      .andWhere("task.done is NULL")
+      .orderBy("task.done", "ASC")
+      .getMany();
+  }
+
+  @Authorized()
+  @Query(_returns => [Task])
+  async completedTasks(@Ctx() { user }: AuthorizedContext): Promise<Task[]> {
+    return getRepository(Task)
+      .createQueryBuilder("task")
+      .leftJoin("task.user", "user")
+      .where("user.id = :id", { id: user.id })
+      .andWhere("task.done is not NULL")
       .orderBy("task.order", "ASC")
+      .limit(10)
       .getMany();
   }
 
