@@ -24,6 +24,17 @@ type Query {
   completedTasks: [Task!]!
 }
 
+type Repeat {
+  freq: String!
+  byweekday: [Float!]
+}
+
+"""Recurring task input data"""
+input RepeatInput {
+  freq: String!
+  byweekday: [Float!]
+}
+
 type Task {
   id: ID!
   title: String!
@@ -32,6 +43,7 @@ type Task {
   end: DateTime
   includeTime: Boolean!
   order: Float!
+  repeat: Repeat
 }
 
 type TaskReorder {
@@ -53,6 +65,7 @@ input UpdateTaskInput {
   end: DateTime
   includeTime: Boolean!
   order: Float!
+  repeat: RepeatInput
 }
 
 type User {

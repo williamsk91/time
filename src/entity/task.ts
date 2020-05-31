@@ -13,6 +13,15 @@ import { Field, ID, ObjectType } from "type-graphql";
 import { User } from "./user";
 
 @ObjectType()
+export class Repeat {
+  @Field()
+  freq: "daily" | "weekly" | "monthly" | "yearly";
+
+  @Field(_type => [Number], { nullable: true })
+  byweekday?: number[];
+}
+
+@ObjectType()
 @Entity()
 export class Task extends BaseEntity {
   @Field(_type => ID)
@@ -43,6 +52,10 @@ export class Task extends BaseEntity {
   @Column()
   @Generated("increment")
   order: number;
+
+  @Field(_type => Repeat, { nullable: true })
+  @Column({ type: "jsonb", default: null })
+  repeat?: Repeat;
 
   // ------------------------- relation -------------------------
   @ManyToOne(() => User, user => user.tasks)

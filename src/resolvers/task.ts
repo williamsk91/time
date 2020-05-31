@@ -10,11 +10,20 @@ import {
   Authorized,
   ObjectType
 } from "type-graphql";
-import { Task } from "../entity/task";
+import { Task, Repeat } from "../entity/task";
 import { User } from "../entity/user";
 import { AuthorizedContext } from "../authorization/authChecker";
 import { UserNotFoundError, TaskNotFoundError } from "../error";
 import { getRepository, getConnection } from "typeorm";
+
+@InputType({ description: "Recurring task input data" })
+class RepeatInput implements Repeat {
+  @Field()
+  freq: "daily" | "weekly" | "monthly" | "yearly";
+
+  @Field(_type => [Number], { nullable: true })
+  byweekday?: number[];
+}
 
 @InputType({ description: "New task data" })
 class UpdateTaskInput implements Partial<Task> {
@@ -38,6 +47,9 @@ class UpdateTaskInput implements Partial<Task> {
 
   @Field()
   order: number;
+
+  @Field({ nullable: true })
+  repeat?: RepeatInput;
 }
 
 @ObjectType()
