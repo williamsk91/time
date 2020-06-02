@@ -42,6 +42,7 @@ type Task {
   start: DateTime
   end: DateTime
   includeTime: Boolean!
+  color: String
   order: Float!
   repeat: Repeat
 }
@@ -64,6 +65,7 @@ input UpdateTaskInput {
   start: DateTime
   end: DateTime
   includeTime: Boolean!
+  color: String
   order: Float!
   repeat: RepeatInput
 }

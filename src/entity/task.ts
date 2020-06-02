@@ -48,6 +48,10 @@ export class Task extends BaseEntity {
   @Column({ default: false })
   includeTime: boolean;
 
+  @Field({ nullable: true })
+  @Column({ default: null })
+  color?: string;
+
   @Field()
   @Column()
   @Generated("increment")

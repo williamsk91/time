@@ -45,6 +45,9 @@ class UpdateTaskInput implements Partial<Task> {
   @Field()
   includeTime: boolean;
 
+  @Field({ nullable: true })
+  color?: string;
+
   @Field()
   order: number;
 
