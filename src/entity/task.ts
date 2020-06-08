@@ -30,7 +30,7 @@ export class Task extends BaseEntity {
 
   @Field()
   @Column()
-  title: String;
+  title: string;
 
   @Field({ nullable: true })
   @Column({ default: null })

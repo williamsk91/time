@@ -3,6 +3,16 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
+input CreateTaskInput {
+  title: String!
+  done: DateTime
+  start: DateTime
+  end: DateTime
+  includeTime: Boolean!
+  color: String
+  repeat: RepeatInput
+}
+
 """
 The javascript `Date` as string. Type represents date and time as the ISO Date string.
 """
@@ -13,7 +23,7 @@ type Mutation {
 
   """Danger! Deletes a user account."""
   deleteUser: Boolean!
-  createTask(title: String!): Task!
+  createTask(task: CreateTaskInput!): Task!
   updateTask(task: UpdateTaskInput!): Task!
   taskReorder(tasks: [TaskReorderInput!]!): [TaskReorder!]!
 }

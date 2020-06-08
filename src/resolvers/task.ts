@@ -31,7 +31,7 @@ class UpdateTaskInput implements Partial<Task> {
   id: string;
 
   @Field()
-  title: String;
+  title: string;
 
   @Field({ nullable: true })
   done?: Date;
@@ -71,6 +71,30 @@ class TaskReorderInput implements Partial<Task> {
 
   @Field()
   order: number;
+}
+
+@InputType()
+class CreateTaskInput implements Partial<Task> {
+  @Field()
+  title: string;
+
+  @Field({ nullable: true })
+  done?: Date;
+
+  @Field({ nullable: true })
+  start?: Date;
+
+  @Field({ nullable: true })
+  end?: Date;
+
+  @Field()
+  includeTime: boolean;
+
+  @Field({ nullable: true })
+  color?: string;
+
+  @Field({ nullable: true })
+  repeat?: RepeatInput;
 }
 
 @Resolver()
@@ -120,10 +144,10 @@ export class TaskResolver {
   @Authorized()
   @Mutation(_returns => Task)
   async createTask(
-    @Arg("title") title: string,
+    @Arg("task") task: CreateTaskInput,
     @Ctx() { user }: AuthorizedContext
   ): Promise<Task> {
-    return await createTask(user.id, title);
+    return await createTask(user.id, task);
   }
 
   @Authorized()
@@ -144,14 +168,17 @@ export class TaskResolver {
 
 // ------------------------- Business logic -------------------------
 
-async function createTask(userId: string, title: string): Promise<Task> {
+async function createTask(
+  userId: string,
+  task: CreateTaskInput
+): Promise<Task> {
   const user = await User.getById(userId);
   if (!user) throw UserNotFoundError;
 
-  const task = Task.create({ title, user });
-  await task.save();
+  const newTask = Task.create({ ...task, user });
+  await newTask.save();
 
-  return task;
+  return newTask;
 }
 
 async function updateTask(task: UpdateTaskInput): Promise<Task> {
