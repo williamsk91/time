@@ -76,6 +76,23 @@ class TaskReorderInput implements Partial<Task> {
 @Resolver()
 export class TaskResolver {
   @Authorized()
+  @Query(_returns => Task)
+  async task(
+    @Arg("id", _ => ID) id: string,
+    @Ctx() { user }: AuthorizedContext
+  ): Promise<Task> {
+    const task = await getRepository(Task)
+      .createQueryBuilder("task")
+      .leftJoin("task.user", "user")
+      .where("task.id = :id", { id })
+      .andWhere("user.id = :userId", { userId: user.id })
+      .getOne();
+    if (!task) throw TaskNotFoundError;
+
+    return task;
+  }
+
+  @Authorized()
   @Query(_returns => [Task])
   async tasks(@Ctx() { user }: AuthorizedContext): Promise<Task[]> {
     return getRepository(Task)

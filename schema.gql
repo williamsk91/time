@@ -20,6 +20,7 @@ type Mutation {
 
 type Query {
   me: User!
+  task(id: ID!): Task!
   tasks: [Task!]!
   completedTasks: [Task!]!
 }
