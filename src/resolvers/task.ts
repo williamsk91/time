@@ -123,6 +123,7 @@ export class TaskResolver {
       .createQueryBuilder("task")
       .leftJoin("task.user", "user")
       .where("user.id = :id", { id: user.id })
+      .andWhere("task.done is NULL")
       .orderBy("task.done", "ASC")
       .getMany();
   }
