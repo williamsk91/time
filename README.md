@@ -1,11 +1,10 @@
 # Time
 
-Server side codes for T2
+Server side codes for Overcast
 
 # Stack
 
 - Language - [Typescript](https://www.typescriptlang.org/)
-- Framework - [graphql-yoga](https://github.com/prisma-labs/graphql-yoga)
 - Database - [PostgreSQL](https://www.postgresql.org/)
 - Authentication - [OAuth](https://oauth.net/)
 
@@ -48,18 +47,10 @@ Also ensure that a local postgres database is created with credentials specified
 
 ## Start development
 
-This will also launch GraphQL playground in [http://localhost:4000/](http://localhost:4000/)
+This will also launch GraphQL playground in [http://localhost:4000/graphql](http://localhost:4000/graphql)
 
 ```
 yarn dev
-```
-
-## GraphQL typings
-
-GraphQL typing should not be done manually, instead be generated using [gql2ts](https://github.com/amount/gql2ts)
-
-```
-yarn genGraphql
 ```
 
 # Database

@@ -43,6 +43,7 @@
   "scripts": {
     "dev": "ts-node-dev --no-notify -r dotenv/config src/server.ts",
     "db:setup": "ts-node ./src/test-utils/setup.ts",
-    "test": "yarn db:setup && jest --watch"
+    "test": "yarn db:setup && jest --watch",
+    "heroku-postbuild": "rimraf dist && tsc"
   }
 }
