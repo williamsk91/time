@@ -3,8 +3,8 @@ import { sign, verify } from "jsonwebtoken";
 
 import { User } from "../entity/user";
 
-const ACCESS_TOKEN = "T2_access_token";
-const REFRESH_TOKEN = "T2_refresh_token";
+const ACCESS_TOKEN = "overcast_access_token";
+const REFRESH_TOKEN = "overcast_refresh_token";
 
 /**
  * Create JWT for the `user`
@@ -14,7 +14,7 @@ export const createJWT = (user: User) => {
     { userId: user.id },
     process.env.JWT_SECRET as string,
     {
-      expiresIn: "15min"
+      expiresIn: "15min",
     }
   );
 
@@ -22,12 +22,12 @@ export const createJWT = (user: User) => {
     { userId: user.id, count: user.count },
     process.env.JWT_SECRET as string,
     {
-      expiresIn: "7d"
+      expiresIn: "7d",
     }
   );
   return {
     accessToken,
-    refreshToken
+    refreshToken,
   };
 };
 
@@ -38,7 +38,7 @@ export const setJWTCookie = (res: Response, user: User) => {
   const { accessToken, refreshToken } = createJWT(user);
   res.cookie(ACCESS_TOKEN, accessToken, { maxAge: 100 * 60 * 15 });
   res.cookie(REFRESH_TOKEN, refreshToken, {
-    maxAge: 100 * 60 * 60 * 24 * 7
+    maxAge: 100 * 60 * 60 * 24 * 7,
   });
 };
 
