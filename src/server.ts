@@ -25,9 +25,7 @@ async function bootstrap() {
 
   app.use(cookieParser());
   app.use(JWTMiddleware());
-  app.use(
-    cors({ origin: [process.env.FRONTEND_HOST as string], credentials: true })
-  );
+
   useGoogleOauth(app);
 
   const schema = await createSchema();
@@ -40,15 +38,18 @@ async function bootstrap() {
         req,
         res,
         user: {
-          id: req.userId
-        }
+          id: req.userId,
+        },
       };
-    }
+    },
   });
 
   server.applyMiddleware({
     app,
-    cors: false
+    cors: {
+      origin: [process.env.FRONTEND_HOST as string],
+      credentials: true,
+    },
   });
 
   // Start the server
