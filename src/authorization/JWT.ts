@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { CookieOptions, Request, Response } from "express";
 import { sign, verify } from "jsonwebtoken";
 
 import { User } from "../entity/user";
@@ -36,14 +36,18 @@ export const createJWT = (user: User) => {
  */
 export const setJWTCookie = (res: Response, user: User) => {
   const { accessToken, refreshToken } = createJWT(user);
+  const cookieOptions: CookieOptions = {
+    domain: process.env.COOKIE_DOMAIN,
+    sameSite: "strict",
+  };
 
   res.cookie(ACCESS_TOKEN, accessToken, {
     maxAge: 100 * 60 * 15,
-    sameSite: "strict",
+    ...cookieOptions,
   });
   res.cookie(REFRESH_TOKEN, refreshToken, {
     maxAge: 100 * 60 * 60 * 24 * 7,
-    sameSite: "strict",
+    ...cookieOptions,
   });
 };
 
