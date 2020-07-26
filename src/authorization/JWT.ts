@@ -38,7 +38,6 @@ export const setJWTCookie = (res: Response, user: User) => {
   const { accessToken, refreshToken } = createJWT(user);
   const cookieOptions: CookieOptions = {
     sameSite: "none",
-    secure: process.env.NODE_ENV !== "development",
   };
 
   res.cookie(ACCESS_TOKEN, accessToken, {
