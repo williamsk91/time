@@ -46,7 +46,7 @@ async function bootstrap() {
   server.applyMiddleware({
     app,
     cors: {
-      origin: [process.env.FRONTEND_HOST as string],
+      origin: process.env.FRONTEND_HOST as string,
       credentials: true,
     },
   });
