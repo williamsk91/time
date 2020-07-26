@@ -3,7 +3,6 @@ import "reflect-metadata";
 import { ApolloServer } from "apollo-server-express";
 import { JWTMiddleware } from "./authorization/JWT";
 import cookieParser from "cookie-parser";
-import cors from "cors";
 import { createConnection } from "typeorm";
 import { createSchema } from "./graphql/schema";
 import express from "express";
