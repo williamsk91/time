@@ -41,6 +41,7 @@ async function bootstrap() {
         },
       };
     },
+    introspection: true,
   });
 
   server.applyMiddleware({
