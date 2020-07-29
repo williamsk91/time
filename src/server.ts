@@ -37,7 +37,7 @@ async function bootstrap() {
         req,
         res,
         user: {
-          id: req.userId,
+          id: (req as any).userId,
         },
       };
     },

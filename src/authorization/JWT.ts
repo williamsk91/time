@@ -105,7 +105,7 @@ export const JWTMiddleware = () => async (
     if (!user || user.count !== data.count) return next();
     // refresh tokens
     setJWTCookie(res, user);
-    req.userId = user.id;
+    (req as any).userId = user.id;
 
     return next();
   }
