@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "description": "GraphQL server for Overcast - Calendar & Task",
   "private": true,
+  "engines": {
+    "node": "10.x"
+  },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.2",
     "@types/cors": "^2.8.6",
