@@ -8,7 +8,7 @@ import { clearJWTCookie } from "../authorization/JWT";
 @Resolver()
 export class UserResolver {
   @Authorized()
-  @Query(_return => User)
+  @Query((_return) => User)
   async me(@Ctx() { user }: AuthorizedContext): Promise<User> {
     const userData = await User.getById(user.id);
     if (!userData) throw UserNotFoundError;
@@ -16,25 +16,20 @@ export class UserResolver {
   }
 
   @Authorized()
-  @Mutation(_return => Boolean)
-  async signOut(
-    @Ctx() { user: { id }, res }: AuthorizedContext
-  ): Promise<boolean> {
+  @Mutation((_return) => Boolean)
+  async signOut(@Ctx() { user: { id } }: AuthorizedContext): Promise<boolean> {
     // updates count
     const userData = await User.getById(id);
     if (!userData) throw UserNotFoundError;
     userData.count += 1;
     await userData.save();
 
-    // clear cookies
-    clearJWTCookie(res);
-
     return true;
   }
 
   @Authorized()
-  @Mutation(_return => Boolean, {
-    description: "Danger! Deletes a user account."
+  @Mutation((_return) => Boolean, {
+    description: "Danger! Deletes a user account.",
   })
   async deleteUser(
     @Ctx() { user: { id }, res }: AuthorizedContext
