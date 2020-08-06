@@ -17,13 +17,17 @@ export class UserResolver {
 
   @Authorized()
   @Mutation((_return) => Boolean)
-  async signOut(@Ctx() { user: { id } }: AuthorizedContext): Promise<boolean> {
+  async signOut(
+    @Ctx() { user: { id }, res }: AuthorizedContext
+  ): Promise<boolean> {
     // updates count
     const userData = await User.getById(id);
     if (!userData) throw UserNotFoundError;
     userData.count += 1;
     await userData.save();
 
+    // clear cookies
+    clearJWTCookie(res);
     return true;
   }
 

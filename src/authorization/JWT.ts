@@ -64,8 +64,9 @@ export const getJWTCookie = (req: Request) => {
  * Clear JWT from cookies
  */
 export const clearJWTCookie = (res: Response) => {
-  res.clearCookie(REFRESH_TOKEN);
-  res.clearCookie(ACCESS_TOKEN);
+  const options = { path: "/", domain: process.env.COOKIE_DOMAIN };
+  res.clearCookie(REFRESH_TOKEN, options);
+  res.clearCookie(ACCESS_TOKEN, options);
 };
 
 /**
