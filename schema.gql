@@ -3,6 +3,11 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
+input CreateListInput {
+  title: String!
+  color: String
+}
+
 input CreateTaskInput {
   title: String!
   done: DateTime
@@ -18,21 +23,32 @@ The javascript `Date` as string. Type represents date and time as the ISO Date s
 """
 scalar DateTime
 
+type List {
+  id: ID!
+  title: String!
+  color: String
+}
+
 type Mutation {
   signOut: Boolean!
 
   """Danger! Deletes a user account."""
   deleteUser: Boolean!
-  createTask(task: CreateTaskInput!): Task!
+  createList(list: CreateListInput!): List!
+  updateList(list: UpdateListInput!): List!
+  deleteList(listId: ID!): List!
+  createTask(task: CreateTaskInput!, listId: ID!): Task!
   updateTask(task: UpdateTaskInput!): Task!
   taskReorder(tasks: [TaskReorderInput!]!): [TaskReorder!]!
 }
 
 type Query {
   me: User!
+  list(id: ID!): List!
+  lists: [List!]!
   task(id: ID!): Task!
-  tasks: [Task!]!
-  completedTasks: [Task!]!
+  tasks(listId: ID!): [Task!]!
+  completedTasks(listId: ID!): [Task!]!
 }
 
 type Repeat {
@@ -66,6 +82,13 @@ type TaskReorder {
 input TaskReorderInput {
   id: ID!
   order: Float!
+}
+
+"""New list data"""
+input UpdateListInput {
+  id: ID!
+  title: String!
+  color: String
 }
 
 """New task data"""

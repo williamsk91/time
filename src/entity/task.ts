@@ -4,27 +4,26 @@ import {
   CreateDateColumn,
   Entity,
   Generated,
-  ManyToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
+  ManyToOne,
 } from "typeorm";
 import { Field, ID, ObjectType } from "type-graphql";
-
-import { User } from "./user";
+import { List } from "./list";
 
 @ObjectType()
 export class Repeat {
   @Field()
   freq: "daily" | "weekly" | "monthly" | "yearly";
 
-  @Field(_type => [Number], { nullable: true })
+  @Field((_type) => [Number], { nullable: true })
   byweekday?: number[];
 }
 
 @ObjectType()
 @Entity()
 export class Task extends BaseEntity {
-  @Field(_type => ID)
+  @Field((_type) => ID)
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
@@ -57,13 +56,13 @@ export class Task extends BaseEntity {
   @Generated("increment")
   order: number;
 
-  @Field(_type => Repeat, { nullable: true })
+  @Field((_type) => Repeat, { nullable: true })
   @Column({ type: "jsonb", default: null })
   repeat?: Repeat;
 
   // ------------------------- relation -------------------------
-  @ManyToOne(() => User, user => user.tasks)
-  user: User;
+  @ManyToOne(() => List, (list) => list.tasks)
+  list: List;
 
   // ------------------------- extra column -------------------------
   @CreateDateColumn()

@@ -8,26 +8,30 @@ import {
   InputType,
   Ctx,
   Authorized,
-  ObjectType
+  ObjectType,
 } from "type-graphql";
 import { Task, Repeat } from "../entity/task";
-import { User } from "../entity/user";
 import { AuthorizedContext } from "../authorization/authChecker";
-import { UserNotFoundError, TaskNotFoundError } from "../error";
+import {
+  UserNotFoundError,
+  TaskNotFoundError,
+  ListNotFoundError,
+} from "../error";
 import { getRepository, getConnection } from "typeorm";
+import { List } from "../entity/list";
 
 @InputType({ description: "Recurring task input data" })
 class RepeatInput implements Repeat {
   @Field()
   freq: "daily" | "weekly" | "monthly" | "yearly";
 
-  @Field(_type => [Number], { nullable: true })
+  @Field((_type) => [Number], { nullable: true })
   byweekday?: number[];
 }
 
 @InputType({ description: "New task data" })
 class UpdateTaskInput implements Partial<Task> {
-  @Field(_type => ID)
+  @Field((_type) => ID)
   id: string;
 
   @Field()
@@ -57,7 +61,7 @@ class UpdateTaskInput implements Partial<Task> {
 
 @ObjectType()
 class TaskReorder implements Partial<Task> {
-  @Field(_type => ID)
+  @Field((_type) => ID)
   id: string;
 
   @Field()
@@ -66,7 +70,7 @@ class TaskReorder implements Partial<Task> {
 
 @InputType()
 class TaskReorderInput implements Partial<Task> {
-  @Field(_type => ID)
+  @Field((_type) => ID)
   id: string;
 
   @Field()
@@ -100,16 +104,14 @@ class CreateTaskInput implements Partial<Task> {
 @Resolver()
 export class TaskResolver {
   @Authorized()
-  @Query(_returns => Task)
+  @Query((_returns) => Task)
   async task(
-    @Arg("id", _ => ID) id: string,
+    @Arg("id", () => ID) id: string,
     @Ctx() { user }: AuthorizedContext
   ): Promise<Task> {
     const task = await getRepository(Task)
       .createQueryBuilder("task")
-      .leftJoin("task.user", "user")
       .where("task.id = :id", { id })
-      .andWhere("user.id = :userId", { userId: user.id })
       .getOne();
     if (!task) throw TaskNotFoundError;
 
@@ -117,24 +119,30 @@ export class TaskResolver {
   }
 
   @Authorized()
-  @Query(_returns => [Task])
-  async tasks(@Ctx() { user }: AuthorizedContext): Promise<Task[]> {
+  @Query((_returns) => [Task])
+  async tasks(
+    @Arg("listId", () => ID) listId: string,
+    @Ctx() { user }: AuthorizedContext
+  ): Promise<Task[]> {
     return getRepository(Task)
       .createQueryBuilder("task")
-      .leftJoin("task.user", "user")
-      .where("user.id = :id", { id: user.id })
+      .leftJoin("task.list", "list")
+      .where("list.id = :id", { id: listId })
       .andWhere("task.done is NULL")
       .orderBy("task.done", "ASC")
       .getMany();
   }
 
   @Authorized()
-  @Query(_returns => [Task])
-  async completedTasks(@Ctx() { user }: AuthorizedContext): Promise<Task[]> {
+  @Query((_returns) => [Task])
+  async completedTasks(
+    @Arg("listId", () => ID) listId: string,
+    @Ctx() { user }: AuthorizedContext
+  ): Promise<Task[]> {
     return getRepository(Task)
       .createQueryBuilder("task")
-      .leftJoin("task.user", "user")
-      .where("user.id = :id", { id: user.id })
+      .leftJoin("task.list", "list")
+      .where("list.id = :id", { id: listId })
       .andWhere("task.done is not NULL")
       .orderBy("task.order", "ASC")
       .limit(10)
@@ -142,24 +150,27 @@ export class TaskResolver {
   }
 
   @Authorized()
-  @Mutation(_returns => Task)
+  @Mutation((_returns) => Task)
   async createTask(
+    @Arg("listId", () => ID) listId: string,
     @Arg("task") task: CreateTaskInput,
     @Ctx() { user }: AuthorizedContext
   ): Promise<Task> {
-    return await createTask(user.id, task);
+    const list = await List.getById(listId);
+    if (!list) throw ListNotFoundError;
+    return await createTask(listId, task);
   }
 
   @Authorized()
-  @Mutation(_returns => Task)
+  @Mutation((_returns) => Task)
   async updateTask(@Arg("task") task: UpdateTaskInput): Promise<Task> {
     return await updateTask(task);
   }
 
   @Authorized()
-  @Mutation(_returns => [TaskReorder])
+  @Mutation((_returns) => [TaskReorder])
   async taskReorder(
-    @Arg("tasks", _ => [TaskReorderInput])
+    @Arg("tasks", () => [TaskReorderInput])
     taskReorderInput: TaskReorderInput[]
   ): Promise<TaskReorder[]> {
     return taskReorderTransaction(taskReorderInput);
@@ -169,13 +180,13 @@ export class TaskResolver {
 // ------------------------- Business logic -------------------------
 
 async function createTask(
-  userId: string,
+  listId: string,
   task: CreateTaskInput
 ): Promise<Task> {
-  const user = await User.getById(userId);
-  if (!user) throw UserNotFoundError;
+  const list = await List.getById(listId);
+  if (!list) throw UserNotFoundError;
 
-  const newTask = Task.create({ ...task, user });
+  const newTask = Task.create({ ...task, list });
   await newTask.save();
 
   return newTask;
@@ -196,7 +207,7 @@ async function taskReorderTransaction(
   taskReorder: TaskReorder[]
 ): Promise<TaskReorder[]> {
   const shiftedOrder = cycleArray(taskReorder);
-  await getConnection().transaction(async transManager => {
+  await getConnection().transaction(async (transManager) => {
     const maps = taskReorder.map(
       async ({ id }, i) =>
         await transManager

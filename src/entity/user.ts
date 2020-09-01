@@ -3,17 +3,16 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  PrimaryGeneratedColumn,
   OneToMany,
-  PrimaryGeneratedColumn
 } from "typeorm";
 import { Field, ID, ObjectType } from "type-graphql";
-
-import { Task } from "./task";
+import { List } from "./list";
 
 @ObjectType()
 @Entity()
 export class User extends BaseEntity {
-  @Field(_type => ID)
+  @Field((_type) => ID)
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
@@ -30,8 +29,8 @@ export class User extends BaseEntity {
   deleted?: Date;
 
   // ------------------------- relation -------------------------
-  @OneToMany(() => Task, task => task.user, { cascade: true })
-  tasks: Task[];
+  @OneToMany(() => List, (list) => list.user, { cascade: true })
+  lists: List[];
 
   // ------------------------- extra column -------------------------
   @CreateDateColumn()
