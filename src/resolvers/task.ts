@@ -6,19 +6,14 @@ import {
   Mutation,
   Arg,
   InputType,
-  Ctx,
   Authorized,
   ObjectType,
 } from "type-graphql";
 import { Task, Repeat } from "../entity/task";
-import { AuthorizedContext } from "../authorization/authChecker";
-import {
-  UserNotFoundError,
-  TaskNotFoundError,
-  ListNotFoundError,
-} from "../error";
+import { UserNotFoundError, TaskNotFoundError } from "../error";
 import { getRepository, getConnection } from "typeorm";
 import { List } from "../entity/list";
+import { TaskAuthorized, ListAuthorized } from "../decorator/authorization";
 
 @InputType({ description: "Recurring task input data" })
 class RepeatInput implements Repeat {
@@ -104,11 +99,9 @@ class CreateTaskInput implements Partial<Task> {
 @Resolver()
 export class TaskResolver {
   @Authorized()
+  @TaskAuthorized()
   @Query((_returns) => Task)
-  async task(
-    @Arg("id", () => ID) id: string,
-    @Ctx() { user }: AuthorizedContext
-  ): Promise<Task> {
+  async task(@Arg("id", () => ID) id: string): Promise<Task> {
     const task = await getRepository(Task)
       .createQueryBuilder("task")
       .where("task.id = :id", { id })
@@ -119,49 +112,43 @@ export class TaskResolver {
   }
 
   @Authorized()
+  @ListAuthorized()
   @Query((_returns) => [Task])
-  async tasks(
-    @Arg("listId", () => ID) listId: string,
-    @Ctx() { user }: AuthorizedContext
-  ): Promise<Task[]> {
+  async tasks(@Arg("listId", () => ID) listId: string): Promise<Task[]> {
     return getRepository(Task)
       .createQueryBuilder("task")
-      .leftJoin("task.list", "list")
-      .where("list.id = :id", { id: listId })
-      .andWhere("task.done is NULL")
+      .innerJoin("task.list", "list", "list.id = :id", { id: listId })
+      .where("task.done is NULL")
       .orderBy("task.done", "ASC")
       .getMany();
   }
 
   @Authorized()
+  @ListAuthorized()
   @Query((_returns) => [Task])
   async completedTasks(
-    @Arg("listId", () => ID) listId: string,
-    @Ctx() { user }: AuthorizedContext
+    @Arg("listId", () => ID) listId: string
   ): Promise<Task[]> {
     return getRepository(Task)
       .createQueryBuilder("task")
-      .leftJoin("task.list", "list")
-      .where("list.id = :id", { id: listId })
-      .andWhere("task.done is not NULL")
+      .innerJoin("task.list", "list", "list.id = :id", { id: listId })
+      .where("task.done is not NULL")
       .orderBy("task.order", "ASC")
-      .limit(10)
       .getMany();
   }
 
   @Authorized()
+  @ListAuthorized()
   @Mutation((_returns) => Task)
   async createTask(
     @Arg("listId", () => ID) listId: string,
-    @Arg("task") task: CreateTaskInput,
-    @Ctx() { user }: AuthorizedContext
+    @Arg("task") task: CreateTaskInput
   ): Promise<Task> {
-    const list = await List.getById(listId);
-    if (!list) throw ListNotFoundError;
     return await createTask(listId, task);
   }
 
   @Authorized()
+  @TaskAuthorized()
   @Mutation((_returns) => Task)
   async updateTask(@Arg("task") task: UpdateTaskInput): Promise<Task> {
     return await updateTask(task);

@@ -14,6 +14,7 @@ import { AuthorizedContext } from "../authorization/authChecker";
 import { getRepository } from "typeorm";
 import { ListNotFoundError, UserNotFoundError } from "../error";
 import { User } from "../entity/user";
+import { ListAuthorized } from "../decorator/authorization";
 
 @InputType()
 class CreateListInput implements Partial<List> {
@@ -78,12 +79,17 @@ export class ListResolver {
   }
 
   @Authorized()
+  @ListAuthorized()
   @Mutation((_returns) => List)
-  async updateList(@Arg("list") list: UpdateListInput): Promise<List> {
+  async updateList(
+    @Arg("list")
+    list: UpdateListInput
+  ): Promise<List> {
     return await updateList(list);
   }
 
   @Authorized()
+  @ListAuthorized()
   @Mutation((_returns) => List)
   async deleteList(@Arg("listId", () => ID) listId: string): Promise<List> {
     return await deleteList(listId);

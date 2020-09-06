@@ -4,18 +4,18 @@
 # -----------------------------------------------
 
 input CreateListInput {
-  title: String!
   color: String
+  title: String!
 }
 
 input CreateTaskInput {
-  title: String!
+  color: String
   done: DateTime
-  start: DateTime
   end: DateTime
   includeTime: Boolean!
-  color: String
   repeat: RepeatInput
+  start: DateTime
+  title: String!
 }
 
 """
@@ -24,54 +24,54 @@ The javascript `Date` as string. Type represents date and time as the ISO Date s
 scalar DateTime
 
 type List {
+  color: String
   id: ID!
   title: String!
-  color: String
 }
 
 type Mutation {
-  signOut: Boolean!
+  createList(list: CreateListInput!): List!
+  createTask(listId: ID!, task: CreateTaskInput!): Task!
+  deleteList(listId: ID!): List!
 
   """Danger! Deletes a user account."""
   deleteUser: Boolean!
-  createList(list: CreateListInput!): List!
-  updateList(list: UpdateListInput!): List!
-  deleteList(listId: ID!): List!
-  createTask(task: CreateTaskInput!, listId: ID!): Task!
-  updateTask(task: UpdateTaskInput!): Task!
+  signOut: Boolean!
   taskReorder(tasks: [TaskReorderInput!]!): [TaskReorder!]!
+  updateList(list: UpdateListInput!): List!
+  updateTask(task: UpdateTaskInput!): Task!
 }
 
 type Query {
-  me: User!
+  completedTasks(listId: ID!): [Task!]!
   list(id: ID!): List!
   lists: [List!]!
+  me: User!
   task(id: ID!): Task!
   tasks(listId: ID!): [Task!]!
-  completedTasks(listId: ID!): [Task!]!
 }
 
 type Repeat {
-  freq: String!
   byweekday: [Float!]
+  freq: String!
 }
 
 """Recurring task input data"""
 input RepeatInput {
-  freq: String!
   byweekday: [Float!]
+  freq: String!
 }
 
 type Task {
-  id: ID!
-  title: String!
-  done: DateTime
-  start: DateTime
-  end: DateTime
-  includeTime: Boolean!
   color: String
+  done: DateTime
+  end: DateTime
+  id: ID!
+  includeTime: Boolean!
   order: Float!
   repeat: Repeat
+  start: DateTime
+  title: String!
 }
 
 type TaskReorder {
@@ -86,22 +86,22 @@ input TaskReorderInput {
 
 """New list data"""
 input UpdateListInput {
+  color: String
   id: ID!
   title: String!
-  color: String
 }
 
 """New task data"""
 input UpdateTaskInput {
-  id: ID!
-  title: String!
-  done: DateTime
-  start: DateTime
-  end: DateTime
-  includeTime: Boolean!
   color: String
+  done: DateTime
+  end: DateTime
+  id: ID!
+  includeTime: Boolean!
   order: Float!
   repeat: RepeatInput
+  start: DateTime
+  title: String!
 }
 
 type User {

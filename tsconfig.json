@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
     "outDir": "dist",
-    "target": "es5",
+    "target": "es2018",
     "module": "commonjs",
-    "lib": ["es6"],
+    "lib": ["es2018", "esnext.asynciterable"],
     "moduleResolution": "Node",
     "importHelpers": true,
     "emitDecoratorMetadata": true,
