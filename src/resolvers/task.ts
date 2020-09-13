@@ -105,6 +105,7 @@ export class TaskResolver {
     const task = await getRepository(Task)
       .createQueryBuilder("task")
       .where("task.id = :id", { id })
+      .andWhere("task.deleted is NULL")
       .getOne();
     if (!task) throw TaskNotFoundError;
 
@@ -119,6 +120,7 @@ export class TaskResolver {
       .createQueryBuilder("task")
       .innerJoin("task.list", "list", "list.id = :id", { id: listId })
       .where("task.done is NULL")
+      .andWhere("task.deleted is NULL")
       .orderBy("task.done", "ASC")
       .getMany();
   }
@@ -133,6 +135,7 @@ export class TaskResolver {
       .createQueryBuilder("task")
       .innerJoin("task.list", "list", "list.id = :id", { id: listId })
       .where("task.done is not NULL")
+      .andWhere("task.deleted is NULL")
       .orderBy("task.order", "ASC")
       .getMany();
   }
@@ -162,6 +165,13 @@ export class TaskResolver {
   ): Promise<TaskReorder[]> {
     return taskReorderTransaction(taskReorderInput);
   }
+
+  @Authorized()
+  @TaskAuthorized()
+  @Mutation((_returns) => Task)
+  async deleteTask(@Arg("id", () => ID) id: string): Promise<Task> {
+    return deleteTask(id);
+  }
 }
 
 // ------------------------- Business logic -------------------------
@@ -184,6 +194,16 @@ async function updateTask(task: UpdateTaskInput): Promise<Task> {
   const updatedTask = await Task.getById(task.id);
   if (!updatedTask) throw TaskNotFoundError;
   return updatedTask;
+}
+
+async function deleteTask(taskId: string): Promise<Task> {
+  const task = await Task.getById(taskId);
+  if (!task) throw TaskNotFoundError;
+
+  task.deleted = new Date();
+  await task.save();
+
+  return task;
 }
 
 /**

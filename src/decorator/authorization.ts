@@ -60,7 +60,6 @@ export const TaskAuthorized = () => {
         .leftJoin("list.user", "user", "user.id = :id", { id: userId })
         .where("task.id = :id", { id: taskId })
         .getOne();
-      console.log("task: ", task);
 
       if (!task) throw TaskNotFoundError;
 

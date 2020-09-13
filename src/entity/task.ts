@@ -60,6 +60,9 @@ export class Task extends BaseEntity {
   @Column({ type: "jsonb", default: null })
   repeat?: Repeat;
 
+  @Column({ default: null })
+  deleted?: Date;
+
   // ------------------------- relation -------------------------
   @ManyToOne(() => List, (list) => list.tasks)
   list: List;

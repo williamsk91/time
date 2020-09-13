@@ -119,8 +119,11 @@ async function updateList(list: UpdateListInput): Promise<List> {
 }
 
 async function deleteList(listId: string): Promise<List> {
-  await List.update(listId, { deleted: new Date() });
-  const updatedList = await List.getById(listId);
-  if (!updatedList) throw ListNotFoundError;
-  return updatedList;
+  const list = await List.getById(listId);
+  if (!list) throw ListNotFoundError;
+
+  list.deleted = new Date();
+  await list.save();
+
+  return list;
 }

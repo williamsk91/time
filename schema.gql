@@ -26,6 +26,7 @@ scalar DateTime
 type List {
   color: String
   id: ID!
+  order: Float!
   title: String!
 }
 
@@ -33,6 +34,7 @@ type Mutation {
   createList(list: CreateListInput!): List!
   createTask(listId: ID!, task: CreateTaskInput!): Task!
   deleteList(listId: ID!): List!
+  deleteTask(id: ID!): Task!
 
   """Danger! Deletes a user account."""
   deleteUser: Boolean!

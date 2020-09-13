@@ -8,6 +8,7 @@ import {
   UpdateDateColumn,
   OneToMany,
   ManyToOne,
+  Generated,
 } from "typeorm";
 import { Task } from "./task";
 import { User } from "./user";
@@ -26,6 +27,11 @@ export class List extends BaseEntity {
   @Field({ nullable: true })
   @Column({ default: null })
   color?: string;
+
+  @Field()
+  @Column()
+  @Generated("increment")
+  order: number;
 
   @Column({ default: null })
   deleted?: Date;
