@@ -116,13 +116,7 @@ export class TaskResolver {
   @ListAuthorized()
   @Query((_returns) => [Task])
   async tasks(@Arg("listId", () => ID) listId: string): Promise<Task[]> {
-    return getRepository(Task)
-      .createQueryBuilder("task")
-      .innerJoin("task.list", "list", "list.id = :id", { id: listId })
-      .where("task.done is NULL")
-      .andWhere("task.deleted is NULL")
-      .orderBy("task.done", "ASC")
-      .getMany();
+    return getTasks(listId);
   }
 
   @Authorized()
@@ -175,6 +169,15 @@ export class TaskResolver {
 }
 
 // ------------------------- Business logic -------------------------
+
+export async function getTasks(listId: string): Promise<Task[]> {
+  return getRepository(Task)
+    .createQueryBuilder("task")
+    .innerJoin("task.list", "list", "list.id = :id", { id: listId })
+    .andWhere("task.deleted is NULL")
+    .orderBy("task.done", "ASC")
+    .getMany();
+}
 
 async function createTask(
   listId: string,

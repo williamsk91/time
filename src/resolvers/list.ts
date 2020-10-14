@@ -8,6 +8,9 @@ import {
   Mutation,
   InputType,
   Field,
+  FieldResolver,
+  Root,
+  ResolverInterface,
 } from "type-graphql";
 import { List } from "../entity/list";
 import { AuthorizedContext } from "../authorization/authChecker";
@@ -15,6 +18,7 @@ import { getRepository } from "typeorm";
 import { ListNotFoundError, UserNotFoundError } from "../error";
 import { User } from "../entity/user";
 import { ListAuthorized } from "../decorator/authorization";
+import { getTasks } from "./task";
 
 @InputType()
 class CreateListInput implements Partial<List> {
@@ -35,6 +39,9 @@ class UpdateListInput implements Partial<List> {
 
   @Field({ nullable: true })
   color?: string;
+
+  @Field()
+  order: number;
 }
 
 @Resolver()
@@ -47,6 +54,7 @@ export class ListResolver {
   ): Promise<List> {
     const list = await getRepository(List)
       .createQueryBuilder("list")
+      .leftJoin("list.tasks", "task")
       .leftJoin("list.user", "user")
       .where("list.id = :id", { id })
       .andWhere("user.id = :userId", { userId: user.id })
@@ -93,6 +101,14 @@ export class ListResolver {
   @Mutation((_returns) => List)
   async deleteList(@Arg("listId", () => ID) listId: string): Promise<List> {
     return await deleteList(listId);
+  }
+}
+
+@Resolver(() => List)
+export class ListObjectResolver implements ResolverInterface<List> {
+  @FieldResolver()
+  tasks(@Root() list: List) {
+    return getTasks(list.id);
   }
 }
 

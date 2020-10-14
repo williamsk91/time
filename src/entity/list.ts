@@ -40,6 +40,7 @@ export class List extends BaseEntity {
   @ManyToOne(() => User, (user) => user.lists)
   user: User;
 
+  @Field(() => [Task])
   @OneToMany(() => Task, (task) => task.list, { cascade: true })
   tasks: Task[];
 

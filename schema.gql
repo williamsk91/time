@@ -27,6 +27,7 @@ type List {
   color: String
   id: ID!
   order: Float!
+  tasks: [Task!]!
   title: String!
 }
 
@@ -66,6 +67,7 @@ input RepeatInput {
 
 type Task {
   color: String
+  deleted: DateTime
   done: DateTime
   end: DateTime
   id: ID!
@@ -90,6 +92,7 @@ input TaskReorderInput {
 input UpdateListInput {
   color: String
   id: ID!
+  order: Float!
   title: String!
 }
 

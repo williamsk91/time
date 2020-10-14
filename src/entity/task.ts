@@ -60,6 +60,7 @@ export class Task extends BaseEntity {
   @Column({ type: "jsonb", default: null })
   repeat?: Repeat;
 
+  @Field({ nullable: true })
   @Column({ default: null })
   deleted?: Date;
 
