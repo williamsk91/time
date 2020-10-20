@@ -33,6 +33,7 @@ export class List extends BaseEntity {
   @Generated("increment")
   order: number;
 
+  @Field({ nullable: true })
   @Column({ default: null })
   deleted?: Date;
 

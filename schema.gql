@@ -25,6 +25,7 @@ scalar DateTime
 
 type List {
   color: String
+  deleted: DateTime
   id: ID!
   order: Float!
   tasks: [Task!]!
