@@ -25,7 +25,7 @@ yarn
 Create `.env` file with the following credentials
 
 ```
-FRONTEND_HOST=http://localhost:3000
+FRONTEND_HOST=http://localhost:2000
 
 # JWT
 JWT_SECRET=

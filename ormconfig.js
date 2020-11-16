@@ -13,9 +13,9 @@ const localConfig = {
   ...baseConfig,
   host: "localhost",
   port: 5432,
-  username: "postgres",
+  username: "williams",
   password: "postgres",
-  database: "timelog",
+  database: "time",
 };
 
 const prodConfig = process.env.DATABASE_URL && {
