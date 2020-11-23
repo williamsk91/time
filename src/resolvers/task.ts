@@ -10,7 +10,11 @@ import {
   ObjectType,
 } from "type-graphql";
 import { Task, Repeat } from "../entity/task";
-import { UserNotFoundError, TaskNotFoundError } from "../error";
+import {
+  UserNotFoundError,
+  TaskNotFoundError,
+  ListNotFoundError,
+} from "../error";
 import { getRepository, getConnection } from "typeorm";
 import { List } from "../entity/list";
 import { TaskAuthorized, ListAuthorized } from "../decorator/authorization";
@@ -147,6 +151,16 @@ export class TaskResolver {
   @Authorized()
   @TaskAuthorized()
   @Mutation((_returns) => Task)
+  async updateTaskList(
+    @Arg("id", () => ID) id: string,
+    @Arg("newListId", () => ID) listId: string
+  ): Promise<Task> {
+    return await updateTaskList(id, listId);
+  }
+
+  @Authorized()
+  @TaskAuthorized()
+  @Mutation((_returns) => Task)
   async updateTask(@Arg("task") task: UpdateTaskInput): Promise<Task> {
     return await updateTask(task);
   }
@@ -190,6 +204,21 @@ async function createTask(
   await newTask.save();
 
   return newTask;
+}
+
+async function updateTaskList(id: string, listId: string): Promise<Task> {
+  const task = await Task.getById(id);
+  if (!task) throw TaskNotFoundError;
+
+  const list = await List.getById(listId);
+  if (!list) throw ListNotFoundError;
+
+  if (list !== task.list) {
+    task.list = list;
+    await task.save();
+  }
+
+  return task;
 }
 
 async function updateTask(task: UpdateTaskInput): Promise<Task> {

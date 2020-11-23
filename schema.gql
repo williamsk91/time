@@ -44,6 +44,7 @@ type Mutation {
   taskReorder(tasks: [TaskReorderInput!]!): [TaskReorder!]!
   updateList(list: UpdateListInput!): List!
   updateTask(task: UpdateTaskInput!): Task!
+  updateTaskList(id: ID!, newListId: ID!): Task!
 }
 
 type Query {
