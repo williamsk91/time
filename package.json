@@ -20,6 +20,7 @@
     "passport-google-oauth20": "^2.0.0",
     "pg": "^8.3.0",
     "reflect-metadata": "^0.1.13",
+    "ts-node": "^9.1.1",
     "type-graphql": "^1.1.1",
     "typeorm": "0.2.29",
     "uuid": "^8.3.0"
@@ -43,7 +44,6 @@
     "nodemon": "^2.0.4",
     "sinon": "^9.0.2",
     "ts-jest": "^26.1.4",
-    "ts-node": "^9.0.0",
     "typescript": "4.0.5"
   },
   "scripts": {
