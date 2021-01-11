@@ -57,6 +57,26 @@ yarn dev
 
 We use [PostgreSQL](https://www.postgresql.org/) with [TypeORM](https://typeorm.io/). See `src/entity` folder for more.
 
+## DB Migrations
+
+Refer to [TypeORM migration](https://typeorm.io/#/migrations) for more information.
+
+### Migration file
+
+Generate migration file with
+
+```
+yarn typeorm migration:generate -n "<name>"
+```
+
+### Run migration
+
+Execute pending migrations with
+
+```
+yarn typeorm migration:run
+```
+
 # Authentication
 
 We use [OAuth](https://oauth.net/) + [JWT](https://jwt.io/) for authentication with the client. Currently, only Google strategy is set up. see `src/authentication` for more.
