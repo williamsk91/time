@@ -42,11 +42,11 @@ export const setJWTCookie = (res: Response, user: User) => {
   };
 
   res.cookie(ACCESS_TOKEN, accessToken, {
-    maxAge: 100 * 60 * 15,
+    maxAge: 1000 * 60 * 15,
     ...cookieOptions,
   });
   res.cookie(REFRESH_TOKEN, refreshToken, {
-    maxAge: 100 * 60 * 60 * 24 * 7,
+    maxAge: 1000 * 60 * 60 * 24 * 7,
     ...cookieOptions,
   });
 };

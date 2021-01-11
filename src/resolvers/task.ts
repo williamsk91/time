@@ -6,28 +6,31 @@ import {
   Mutation,
   Arg,
   InputType,
-  Ctx,
   Authorized,
-  ObjectType
+  ObjectType,
 } from "type-graphql";
 import { Task, Repeat } from "../entity/task";
-import { User } from "../entity/user";
-import { AuthorizedContext } from "../authorization/authChecker";
-import { UserNotFoundError, TaskNotFoundError } from "../error";
+import {
+  UserNotFoundError,
+  TaskNotFoundError,
+  ListNotFoundError,
+} from "../error";
 import { getRepository, getConnection } from "typeorm";
+import { List } from "../entity/list";
+import { TaskAuthorized, ListAuthorized } from "../decorator/authorization";
 
 @InputType({ description: "Recurring task input data" })
 class RepeatInput implements Repeat {
   @Field()
   freq: "daily" | "weekly" | "monthly" | "yearly";
 
-  @Field(_type => [Number], { nullable: true })
+  @Field((_type) => [Number], { nullable: true })
   byweekday?: number[];
 }
 
 @InputType({ description: "New task data" })
 class UpdateTaskInput implements Partial<Task> {
-  @Field(_type => ID)
+  @Field((_type) => ID)
   id: string;
 
   @Field()
@@ -57,7 +60,7 @@ class UpdateTaskInput implements Partial<Task> {
 
 @ObjectType()
 class TaskReorder implements Partial<Task> {
-  @Field(_type => ID)
+  @Field((_type) => ID)
   id: string;
 
   @Field()
@@ -66,7 +69,7 @@ class TaskReorder implements Partial<Task> {
 
 @InputType()
 class TaskReorderInput implements Partial<Task> {
-  @Field(_type => ID)
+  @Field((_type) => ID)
   id: string;
 
   @Field()
@@ -100,16 +103,13 @@ class CreateTaskInput implements Partial<Task> {
 @Resolver()
 export class TaskResolver {
   @Authorized()
-  @Query(_returns => Task)
-  async task(
-    @Arg("id", _ => ID) id: string,
-    @Ctx() { user }: AuthorizedContext
-  ): Promise<Task> {
+  @TaskAuthorized()
+  @Query((_returns) => Task)
+  async task(@Arg("id", () => ID) id: string): Promise<Task> {
     const task = await getRepository(Task)
       .createQueryBuilder("task")
-      .leftJoin("task.user", "user")
       .where("task.id = :id", { id })
-      .andWhere("user.id = :userId", { userId: user.id })
+      .andWhere("task.deleted is NULL")
       .getOne();
     if (!task) throw TaskNotFoundError;
 
@@ -117,68 +117,108 @@ export class TaskResolver {
   }
 
   @Authorized()
-  @Query(_returns => [Task])
-  async tasks(@Ctx() { user }: AuthorizedContext): Promise<Task[]> {
-    return getRepository(Task)
-      .createQueryBuilder("task")
-      .leftJoin("task.user", "user")
-      .where("user.id = :id", { id: user.id })
-      .andWhere("task.done is NULL")
-      .orderBy("task.done", "ASC")
-      .getMany();
+  @ListAuthorized()
+  @Query((_returns) => [Task])
+  async tasks(@Arg("listId", () => ID) listId: string): Promise<Task[]> {
+    return getTasks(listId);
   }
 
   @Authorized()
-  @Query(_returns => [Task])
-  async completedTasks(@Ctx() { user }: AuthorizedContext): Promise<Task[]> {
+  @ListAuthorized()
+  @Query((_returns) => [Task])
+  async completedTasks(
+    @Arg("listId", () => ID) listId: string
+  ): Promise<Task[]> {
     return getRepository(Task)
       .createQueryBuilder("task")
-      .leftJoin("task.user", "user")
-      .where("user.id = :id", { id: user.id })
-      .andWhere("task.done is not NULL")
+      .innerJoin("task.list", "list", "list.id = :id", { id: listId })
+      .where("task.done is not NULL")
+      .andWhere("task.deleted is NULL")
       .orderBy("task.order", "ASC")
-      .limit(10)
       .getMany();
   }
 
   @Authorized()
-  @Mutation(_returns => Task)
+  @ListAuthorized()
+  @Mutation((_returns) => Task)
   async createTask(
-    @Arg("task") task: CreateTaskInput,
-    @Ctx() { user }: AuthorizedContext
+    @Arg("listId", () => ID) listId: string,
+    @Arg("task") task: CreateTaskInput
   ): Promise<Task> {
-    return await createTask(user.id, task);
+    return await createTask(listId, task);
   }
 
   @Authorized()
-  @Mutation(_returns => Task)
+  @TaskAuthorized()
+  @Mutation((_returns) => Task)
+  async updateTaskList(
+    @Arg("id", () => ID) id: string,
+    @Arg("newListId", () => ID) listId: string
+  ): Promise<Task> {
+    return await updateTaskList(id, listId);
+  }
+
+  @Authorized()
+  @TaskAuthorized()
+  @Mutation((_returns) => Task)
   async updateTask(@Arg("task") task: UpdateTaskInput): Promise<Task> {
     return await updateTask(task);
   }
 
   @Authorized()
-  @Mutation(_returns => [TaskReorder])
+  @Mutation((_returns) => [TaskReorder])
   async taskReorder(
-    @Arg("tasks", _ => [TaskReorderInput])
+    @Arg("tasks", () => [TaskReorderInput])
     taskReorderInput: TaskReorderInput[]
   ): Promise<TaskReorder[]> {
     return taskReorderTransaction(taskReorderInput);
+  }
+
+  @Authorized()
+  @TaskAuthorized()
+  @Mutation((_returns) => Task)
+  async deleteTask(@Arg("id", () => ID) id: string): Promise<Task> {
+    return deleteTask(id);
   }
 }
 
 // ------------------------- Business logic -------------------------
 
+export async function getTasks(listId: string): Promise<Task[]> {
+  return getRepository(Task)
+    .createQueryBuilder("task")
+    .innerJoin("task.list", "list", "list.id = :id", { id: listId })
+    .andWhere("task.deleted is NULL")
+    .orderBy("task.done", "ASC")
+    .getMany();
+}
+
 async function createTask(
-  userId: string,
+  listId: string,
   task: CreateTaskInput
 ): Promise<Task> {
-  const user = await User.getById(userId);
-  if (!user) throw UserNotFoundError;
+  const list = await List.getById(listId);
+  if (!list) throw UserNotFoundError;
 
-  const newTask = Task.create({ ...task, user });
+  const newTask = Task.create({ ...task, list });
   await newTask.save();
 
   return newTask;
+}
+
+async function updateTaskList(id: string, listId: string): Promise<Task> {
+  const task = await Task.getById(id);
+  if (!task) throw TaskNotFoundError;
+
+  const list = await List.getById(listId);
+  if (!list) throw ListNotFoundError;
+
+  if (list !== task.list) {
+    task.list = list;
+    await task.save();
+  }
+
+  return task;
 }
 
 async function updateTask(task: UpdateTaskInput): Promise<Task> {
@@ -186,6 +226,16 @@ async function updateTask(task: UpdateTaskInput): Promise<Task> {
   const updatedTask = await Task.getById(task.id);
   if (!updatedTask) throw TaskNotFoundError;
   return updatedTask;
+}
+
+async function deleteTask(taskId: string): Promise<Task> {
+  const task = await Task.getById(taskId);
+  if (!task) throw TaskNotFoundError;
+
+  task.deleted = new Date();
+  await task.save();
+
+  return task;
 }
 
 /**
@@ -196,7 +246,7 @@ async function taskReorderTransaction(
   taskReorder: TaskReorder[]
 ): Promise<TaskReorder[]> {
   const shiftedOrder = cycleArray(taskReorder);
-  await getConnection().transaction(async transManager => {
+  await getConnection().transaction(async (transManager) => {
     const maps = taskReorder.map(
       async ({ id }, i) =>
         await transManager

@@ -25,7 +25,7 @@ yarn
 Create `.env` file with the following credentials
 
 ```
-FRONTEND_HOST=http://localhost:3000
+FRONTEND_HOST=http://localhost:2000
 
 # JWT
 JWT_SECRET=
@@ -56,6 +56,26 @@ yarn dev
 # Database
 
 We use [PostgreSQL](https://www.postgresql.org/) with [TypeORM](https://typeorm.io/). See `src/entity` folder for more.
+
+## DB Migrations
+
+Refer to [TypeORM migration](https://typeorm.io/#/migrations) for more information.
+
+### Migration file
+
+Generate migration file with
+
+```
+yarn typeorm migration:generate -n "<name>"
+```
+
+### Run migration
+
+Execute pending migrations with
+
+```
+yarn typeorm migration:run
+```
 
 # Authentication
 
