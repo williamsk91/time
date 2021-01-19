@@ -9,24 +9,11 @@ import {
   Authorized,
   ObjectType,
 } from "type-graphql";
-import { Task, Repeat } from "../entity/task";
-import {
-  UserNotFoundError,
-  TaskNotFoundError,
-  ListNotFoundError,
-} from "../error";
+import { Task } from "../entity/task";
+import { TaskNotFoundError, ListNotFoundError } from "../error";
 import { getRepository, getConnection } from "typeorm";
 import { List } from "../entity/list";
 import { TaskAuthorized, ListAuthorized } from "../decorator/authorization";
-
-@InputType({ description: "Recurring task input data" })
-class RepeatInput implements Repeat {
-  @Field()
-  freq: "daily" | "weekly" | "monthly" | "yearly";
-
-  @Field((_type) => [Number], { nullable: true })
-  byweekday?: number[];
-}
 
 @InputType({ description: "New task data" })
 class UpdateTaskInput implements Partial<Task> {
@@ -53,9 +40,6 @@ class UpdateTaskInput implements Partial<Task> {
 
   @Field()
   order: number;
-
-  @Field({ nullable: true })
-  repeat?: RepeatInput;
 }
 
 @ObjectType()
@@ -95,9 +79,6 @@ class CreateTaskInput implements Partial<Task> {
 
   @Field({ nullable: true })
   color?: string;
-
-  @Field({ nullable: true })
-  repeat?: RepeatInput;
 }
 
 @Resolver()
@@ -198,7 +179,7 @@ async function createTask(
   task: CreateTaskInput
 ): Promise<Task> {
   const list = await List.getById(listId);
-  if (!list) throw UserNotFoundError;
+  if (!list) throw ListNotFoundError;
 
   const newTask = Task.create({ ...task, list });
   await newTask.save();
