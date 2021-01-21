@@ -54,7 +54,6 @@ export class ListResolver {
   ): Promise<List> {
     const list = await getRepository(List)
       .createQueryBuilder("list")
-      .leftJoin("list.tasks", "task")
       .leftJoin("list.user", "user")
       .where("list.id = :id", { id })
       .andWhere("user.id = :userId", { userId: user.id })

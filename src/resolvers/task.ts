@@ -8,12 +8,16 @@ import {
   InputType,
   Authorized,
   ObjectType,
+  ResolverInterface,
+  FieldResolver,
+  Root,
 } from "type-graphql";
 import { Task } from "../entity/task";
 import { TaskNotFoundError, ListNotFoundError } from "../error";
 import { getRepository, getConnection } from "typeorm";
 import { List } from "../entity/list";
 import { TaskAuthorized, ListAuthorized } from "../decorator/authorization";
+import { Repeat } from "../entity/repeat";
 
 @InputType({ description: "New task data" })
 class UpdateTaskInput implements Partial<Task> {
@@ -163,6 +167,14 @@ export class TaskResolver {
   }
 }
 
+@Resolver(() => Task)
+export class TaskObjectResolver implements ResolverInterface<Task> {
+  @FieldResolver()
+  repeat(@Root() task: Task): Promise<Repeat | undefined> {
+    return getRepeatByTaskId(task.id);
+  }
+}
+
 // ------------------------- Business logic -------------------------
 
 export async function getTasks(listId: string): Promise<Task[]> {
@@ -241,6 +253,14 @@ async function taskReorderTransaction(
   });
   return taskReorder.map((t, i) => ({ ...t, order: shiftedOrder[i].order }));
 }
+
+const getRepeatByTaskId = (taskId: string): Promise<Repeat | undefined> =>
+  getRepository(Repeat)
+    .createQueryBuilder("repeat")
+    .leftJoinAndSelect("repeat.task", "task")
+    .where("task.id = :taskId", { taskId })
+    .andWhere("task.deleted is NULL")
+    .getOne();
 
 /**
  * Cycles the element of the array
