@@ -11,11 +11,15 @@ import {
 import { getRepository } from "typeorm";
 import { Repeat, RepeatFrequency, WeekdayStr } from "../entity/repeat";
 import { Task } from "../entity/task";
-import { TaskNotFoundError, RepeatNotFoundError } from "../error";
+import {
+  TaskNotFoundError,
+  RepeatNotFoundError,
+  RepeatAlreadyExistError,
+} from "../error";
 
 @InputType()
 class CreateRepeatInput implements Partial<Repeat> {
-  @Field()
+  @Field((_type) => RepeatFrequency)
   freq: RepeatFrequency;
 
   @Field()
@@ -85,8 +89,15 @@ async function createRepeat(
   taskId: string,
   repeat: CreateRepeatInput
 ): Promise<Repeat> {
-  const task = await Task.getById(taskId);
+  const task = await getRepository(Task)
+    .createQueryBuilder("task")
+    .where("task.id = :taskId", { taskId })
+    .andWhere("task.deleted is NULL")
+    .leftJoinAndSelect("task.repeat", "repeat")
+    .getOne();
+
   if (!task) throw TaskNotFoundError;
+  if (!!task.repeat) throw RepeatAlreadyExistError;
 
   const newRepeat = Repeat.create({ ...repeat, task });
   await newRepeat.save();

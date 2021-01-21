@@ -9,6 +9,7 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 import { Task } from "./task";
+import { registerEnumType } from "type-graphql";
 
 export enum RepeatFrequency {
   Daily = "daily",
@@ -16,6 +17,11 @@ export enum RepeatFrequency {
   Monthly = "monthly",
   Yearly = "yearly",
 }
+
+registerEnumType(RepeatFrequency, {
+  name: "RepeatFrequency",
+});
+
 export type WeekdayStr = "MO" | "TU" | "WE" | "TH" | "FR" | "SA" | "SU";
 
 @ObjectType()
@@ -25,7 +31,7 @@ export class Repeat extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Field()
+  @Field((_type) => RepeatFrequency)
   @Column()
   freq: RepeatFrequency;
 

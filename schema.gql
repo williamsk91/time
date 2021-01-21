@@ -9,7 +9,7 @@ input CreateListInput {
 }
 
 input CreateRepeatInput {
-  freq: String!
+  freq: RepeatFrequency!
   start: DateTime!
 }
 
@@ -69,9 +69,16 @@ type Repeat {
   deleted: DateTime
   end: DateTime
   exclude: [String!]
-  freq: String!
+  freq: RepeatFrequency!
   id: ID!
   start: DateTime!
+}
+
+enum RepeatFrequency {
+  Daily
+  Monthly
+  Weekly
+  Yearly
 }
 
 type Task {

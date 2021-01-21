@@ -53,6 +53,15 @@ This will also launch GraphQL playground in [http://localhost:4000/graphql](http
 yarn dev
 ```
 
+# Graphql documentation
+
+After running development locally API docs can be accessed on `http://localhost:4000/graphql`.
+
+To authorize:
+
+1. Sign in locally
+2. Change GraphQL Playground setting `request.credentials` from "omit" to "include"
+
 # Database
 
 We use [PostgreSQL](https://www.postgresql.org/) with [TypeORM](https://typeorm.io/). See `src/entity` folder for more.

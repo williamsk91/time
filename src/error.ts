@@ -17,3 +17,6 @@ export const ListUnauthorized = new ForbiddenError(
 export const TaskNotFoundError = new UserInputError("task not found");
 
 export const RepeatNotFoundError = new UserInputError("repeat not found");
+export const RepeatAlreadyExistError = new UserInputError(
+  "repeat already exist"
+);
