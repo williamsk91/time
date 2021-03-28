@@ -5,7 +5,6 @@ import {
   ID,
   InputType,
   Mutation,
-  Query,
   Resolver,
 } from "type-graphql";
 import { getRepository } from "typeorm";
@@ -18,17 +17,8 @@ import {
 } from "../error";
 
 @InputType()
-class CreateRepeatInput implements Partial<Repeat> {
+class UpsertRepeatInput implements Partial<Repeat> {
   @Field((_type) => RepeatFrequency)
-  freq: RepeatFrequency;
-
-  @Field()
-  start: Date;
-}
-
-@InputType()
-class UpdateRepeatInput implements Partial<Repeat> {
-  @Field()
   freq: RepeatFrequency;
 
   @Field()
@@ -47,39 +37,12 @@ class UpdateRepeatInput implements Partial<Repeat> {
 @Resolver()
 export class TaskResolver {
   @Authorized()
-  @Query((_returns) => Repeat)
-  async repeat(@Arg("id", () => ID) id: string): Promise<Repeat | undefined> {
-    const repeat = await getRepository(Repeat)
-      .createQueryBuilder("repeat")
-      .where("repeat.id = :id", { id })
-      .andWhere("repeat.deleted is NULL")
-      .getOne();
-
-    return repeat;
-  }
-
-  @Authorized()
   @Mutation((_returns) => Repeat)
-  async createRepeat(
+  async setRepeat(
     @Arg("taskId", () => ID) taskId: string,
-    @Arg("repeat") repeat: CreateRepeatInput
+    @Arg("repeat", { nullable: true }) repeat?: UpsertRepeatInput
   ): Promise<Repeat> {
-    return await createRepeat(taskId, repeat);
-  }
-
-  @Authorized()
-  @Mutation((_returns) => Repeat)
-  async updateRepeat(
-    @Arg("repeatId", () => ID) repeatId: string,
-    @Arg("repeat") repeat: UpdateRepeatInput
-  ): Promise<Repeat> {
-    return await updateRepeat(repeatId, repeat);
-  }
-
-  @Authorized()
-  @Mutation((_returns) => Repeat)
-  async deleteRepeat(@Arg("id", () => ID) id: string): Promise<Repeat> {
-    return deleteRepeat(id);
+    return await setTaskRepeat(taskId, repeat);
   }
 }
 
@@ -87,7 +50,7 @@ export class TaskResolver {
 
 async function createRepeat(
   taskId: string,
-  repeat: CreateRepeatInput
+  repeat: UpsertRepeatInput
 ): Promise<Repeat> {
   const task = await getRepository(Task)
     .createQueryBuilder("task")
@@ -107,7 +70,7 @@ async function createRepeat(
 
 async function updateRepeat(
   id: string,
-  repeat: UpdateRepeatInput
+  repeat: UpsertRepeatInput
 ): Promise<Repeat> {
   await Repeat.update(id, repeat);
   const updatedRepeat = await Repeat.getById(id);
@@ -115,12 +78,42 @@ async function updateRepeat(
   return updatedRepeat;
 }
 
-async function deleteRepeat(repeatId: string): Promise<Repeat> {
+async function deleteRepeat(taskId: string, repeatId: string): Promise<Repeat> {
   const repeat = await Repeat.getById(repeatId);
   if (!repeat) throw RepeatNotFoundError;
 
-  repeat.deleted = new Date();
-  await repeat.save();
+  // removing foreign key constraint
+  await Task.update({ id: taskId }, { repeat: undefined });
 
+  await Repeat.remove(repeat);
+
+  repeat.id = repeatId;
   return repeat;
+}
+
+/**
+ * if `repeat` is defined upsert it. Else delete it
+ */
+async function setTaskRepeat(
+  taskId: string,
+  repeat?: UpsertRepeatInput
+): Promise<Repeat> {
+  const task = await getRepository(Task)
+    .createQueryBuilder("task")
+    .where("task.id = :taskId", { taskId })
+    .andWhere("task.deleted is NULL")
+    .leftJoinAndSelect("task.repeat", "repeat")
+    .getOne();
+  if (!task) throw TaskNotFoundError;
+
+  // delete
+  if (!repeat) {
+    if (!task.repeat) throw RepeatNotFoundError;
+    return deleteRepeat(taskId, task.repeat.id);
+  }
+
+  // insert
+  if (!task.repeat) return createRepeat(task.id, repeat);
+
+  return updateRepeat(task.repeat.id, repeat);
 }

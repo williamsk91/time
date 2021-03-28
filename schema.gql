@@ -8,11 +8,6 @@ input CreateListInput {
   title: String!
 }
 
-input CreateRepeatInput {
-  freq: RepeatFrequency!
-  start: DateTime!
-}
-
 input CreateTaskInput {
   color: String
   done: DateTime
@@ -38,18 +33,16 @@ type List {
 
 type Mutation {
   createList(list: CreateListInput!): List!
-  createRepeat(repeat: CreateRepeatInput!, taskId: ID!): Repeat!
   createTask(listId: ID!, task: CreateTaskInput!): Task!
   deleteList(listId: ID!): List!
-  deleteRepeat(id: ID!): Repeat!
   deleteTask(id: ID!): Task!
 
   """Danger! Deletes a user account."""
   deleteUser: Boolean!
+  setRepeat(repeat: UpsertRepeatInput, taskId: ID!): Repeat!
   signOut: Boolean!
   taskReorder(tasks: [TaskReorderInput!]!): [TaskReorder!]!
   updateList(list: UpdateListInput!): List!
-  updateRepeat(repeat: UpdateRepeatInput!, repeatId: ID!): Repeat!
   updateTask(task: UpdateTaskInput!): Task!
   updateTaskList(id: ID!, newListId: ID!): Task!
 }
@@ -59,14 +52,12 @@ type Query {
   list(id: ID!): List!
   lists: [List!]!
   me: User!
-  repeat(id: ID!): Repeat!
   task(id: ID!): Task!
   tasks(listId: ID!): [Task!]!
 }
 
 type Repeat {
   byweekday: [String!]
-  deleted: DateTime
   end: DateTime
   exclude: [String!]
   freq: RepeatFrequency!
@@ -112,14 +103,6 @@ input UpdateListInput {
   title: String!
 }
 
-input UpdateRepeatInput {
-  byweekday: [String!]
-  end: DateTime
-  exclude: [String!]
-  freq: String!
-  start: DateTime!
-}
-
 """New task data"""
 input UpdateTaskInput {
   color: String
@@ -130,6 +113,14 @@ input UpdateTaskInput {
   order: Float!
   start: DateTime
   title: String!
+}
+
+input UpsertRepeatInput {
+  byweekday: [String!]
+  end: DateTime
+  exclude: [String!]
+  freq: RepeatFrequency!
+  start: DateTime!
 }
 
 type User {

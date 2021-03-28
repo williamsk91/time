@@ -1,4 +1,5 @@
 import { Field, ID, ObjectType } from "type-graphql";
+import { registerEnumType } from "type-graphql";
 import {
   BaseEntity,
   Column,
@@ -8,8 +9,8 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+
 import { Task } from "./task";
-import { registerEnumType } from "type-graphql";
 
 export enum RepeatFrequency {
   Daily = "daily",
@@ -50,9 +51,6 @@ export class Repeat extends BaseEntity {
   @Field(() => [String], { nullable: true })
   @Column({ type: "simple-array", default: [] })
   exclude: string[];
-
-  @Field({ nullable: true })
-  deleted?: Date;
 
   // ------------------------- relation -------------------------
   @OneToOne(() => Task, (task) => task.repeat)

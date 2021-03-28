@@ -1,16 +1,17 @@
+import { Field, ID, ObjectType } from "type-graphql";
 import {
   BaseEntity,
   Column,
   CreateDateColumn,
   Entity,
   Generated,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
+  JoinColumn,
   ManyToOne,
   OneToOne,
-  JoinColumn,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from "typeorm";
-import { Field, ID, ObjectType } from "type-graphql";
+
 import { List } from "./list";
 import { Repeat } from "./repeat";
 
