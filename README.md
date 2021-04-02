@@ -86,6 +86,14 @@ Execute pending migrations with
 yarn typeorm migration:run
 ```
 
+### Revertin migration
+
+Revert latest migration with
+
+```
+yarn typeorm migration:revert
+```
+
 # Authentication
 
 We use [OAuth](https://oauth.net/) + [JWT](https://jwt.io/) for authentication with the client. Currently, only Google strategy is set up. see `src/authentication` for more.
