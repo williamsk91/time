@@ -18,6 +18,7 @@ import { getRepository, getConnection } from "typeorm";
 import { List } from "../entity/list";
 import { TaskAuthorized, ListAuthorized } from "../decorator/authorization";
 import { Repeat } from "../entity/repeat";
+import { UpsertRepeatInput } from "./repeat";
 
 @InputType({ description: "New task data" })
 class UpdateTaskInput implements Partial<Task> {
@@ -65,7 +66,7 @@ class TaskReorderInput implements Partial<Task> {
 }
 
 @InputType()
-class CreateTaskInput implements Partial<Task> {
+class CreateTaskInput {
   @Field()
   title: string;
 
@@ -83,6 +84,9 @@ class CreateTaskInput implements Partial<Task> {
 
   @Field({ nullable: true })
   color?: string;
+
+  @Field({ nullable: true })
+  repeat?: UpsertRepeatInput;
 }
 
 @Resolver()

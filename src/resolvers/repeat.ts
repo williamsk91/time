@@ -17,7 +17,7 @@ import {
 } from "../error";
 
 @InputType()
-class UpsertRepeatInput implements Partial<Repeat> {
+export class UpsertRepeatInput implements Partial<Repeat> {
   @Field((_type) => RepeatFrequency)
   freq: RepeatFrequency;
 

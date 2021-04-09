@@ -13,6 +13,7 @@ input CreateTaskInput {
   done: DateTime
   end: DateTime
   includeTime: Boolean!
+  repeat: UpsertRepeatInput
   start: DateTime
   title: String!
 }
