@@ -60,7 +60,7 @@ export class Task extends BaseEntity {
   list: List;
 
   @Field(() => Repeat, { nullable: true })
-  @OneToOne(() => Repeat, (repeat) => repeat.task, { cascade: false })
+  @OneToOne(() => Repeat, (repeat) => repeat.task, { cascade: true })
   @JoinColumn()
   repeat?: Repeat;
 
