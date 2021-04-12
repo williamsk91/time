@@ -21,9 +21,6 @@ export class UpsertRepeatInput implements Partial<Repeat> {
   @Field((_type) => RepeatFrequency)
   freq: RepeatFrequency;
 
-  @Field()
-  start: Date;
-
   @Field({ nullable: true })
   end?: Date;
 

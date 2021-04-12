@@ -36,10 +36,6 @@ export class Repeat extends BaseEntity {
   @Column()
   freq: RepeatFrequency;
 
-  @Field()
-  @Column()
-  start: Date;
-
   @Field({ nullable: true })
   @Column({ default: null })
   end?: Date;
