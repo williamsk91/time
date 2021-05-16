@@ -1,4 +1,4 @@
-const typeOrmDir = process.env.NODE_ENV === "production" ? "dist" : "src";
+const typeOrmDir = process.env.NODE_ENV === "development" ? "src" : "dist";
 
 const baseConfig = {
   type: "postgres",

@@ -25,6 +25,7 @@ yarn
 Create `.env` file with the following credentials
 
 ```
+NODE_ENV='development'
 FRONTEND_HOST=http://localhost:2000
 
 # JWT
@@ -100,4 +101,14 @@ We use [OAuth](https://oauth.net/) + [JWT](https://jwt.io/) for authentication w
 
 # Deployment
 
-Master branch is automatically deployed to [Heroku](https://www.heroku.com/home) with the database done using [Heroku PostgreSQL add-ons](https://elements.heroku.com/addons/heroku-postgresql).
+## Staging
+
+`staging` branch is automatically deployed to [Heroku](https://www.heroku.com/home) with the database done using [Heroku PostgreSQL add-ons](https://elements.heroku.com/addons/heroku-postgresql).
+
+endpoint: https://overcast-staging.herokuapp.com/
+
+## Production
+
+`master` branch is automatically deployed to [Heroku](https://www.heroku.com/home) with the database done using [Heroku PostgreSQL add-ons](https://elements.heroku.com/addons/heroku-postgresql).
+
+endpoint: https://time.overcast.life

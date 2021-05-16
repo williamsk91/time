@@ -1,5 +1,6 @@
-import { authChecker } from "../authorization/authChecker";
 import { buildSchema } from "type-graphql";
+
+import { authChecker } from "../authorization/authChecker";
 
 export const createSchema = async () =>
   await buildSchema({
@@ -10,5 +11,5 @@ export const createSchema = async () =>
     // no validations set currently. Remove this line when validations are added.
     validate: false,
     authChecker,
-    emitSchemaFile: process.env.NODE_ENV !== "production",
+    emitSchemaFile: process.env.NODE_ENV === "development",
   });
