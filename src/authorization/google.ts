@@ -12,7 +12,7 @@ export const useGoogleOauth = (app: Express) => {
       {
         clientID: process.env.GOOGLE_CLIENT_ID as string,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-        callbackURL: "/auth/google/callback"
+        callbackURL: "/auth/google/callback",
       },
       async (_accessToken, _refreshToken, profile, cb) => {
         const { id, emails } = profile;
@@ -45,7 +45,7 @@ export const useGoogleOauth = (app: Express) => {
           /** new user -> create user and a base page */
           user = await createUser({
             email,
-            googleId: id
+            googleId: id,
           });
         } else if (!user.googleId) {
           // known user first sign in
@@ -61,10 +61,22 @@ export const useGoogleOauth = (app: Express) => {
 
   app.use(passport.initialize());
 
+  /**
+   * Passport checks `req.connection.encrypted` to determine whether it is a
+   * secure connection or not. As we are using Heroku this value will always be
+   * `undefined`. Therefore, causing the redirect url protocol to be `http`
+   * instead of `https`. This causes authentication to fail as `http` protocols
+   * is not added to allowed production redirects.
+   *
+   * @see https://stackoverflow.com/a/20848306
+   * @see https://console.cloud.google.com/apis/credentials/oauthclient/565564764822-at3vtio2nfb473l8cjo59oq36vo5cvop.apps.googleusercontent.com?project=overcast-e7298
+   */
+  app.enable("trust proxy");
+
   app.get(
     "/auth/google",
     passport.authenticate("google", {
-      scope: ["email", "profile"]
+      scope: ["email", "profile"],
     })
   );
 
@@ -72,7 +84,7 @@ export const useGoogleOauth = (app: Express) => {
     "/auth/google/callback",
     passport.authenticate("google", {
       session: false,
-      failureRedirect: `${process.env.FRONTEND_HOST}/login`
+      failureRedirect: `${process.env.FRONTEND_HOST}/login`,
     }),
     (req, res) => {
       setJWTCookie(res, (req as any).user);
