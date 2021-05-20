@@ -13,6 +13,7 @@ import {
 } from "typeorm";
 
 import { List } from "./list";
+import { Note } from "./note";
 import { Repeat } from "./repeat";
 
 @ObjectType()
@@ -63,6 +64,11 @@ export class Task extends BaseEntity {
   @OneToOne(() => Repeat, (repeat) => repeat.task, { cascade: true })
   @JoinColumn()
   repeat?: Repeat;
+
+  @Field(() => Note, { nullable: true })
+  @OneToOne(() => Note, (note) => note.task, { cascade: true })
+  @JoinColumn()
+  note?: Note;
 
   // ------------------------- extra column -------------------------
   @CreateDateColumn()
