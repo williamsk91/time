@@ -1,8 +1,8 @@
 import {
   ApolloError,
   AuthenticationError,
-  UserInputError,
   ForbiddenError,
+  UserInputError,
 } from "apollo-server-errors";
 
 export type ServerError = ApolloError;
@@ -20,3 +20,6 @@ export const RepeatNotFoundError = new UserInputError("repeat not found");
 export const RepeatAlreadyExistError = new UserInputError(
   "repeat already exist"
 );
+
+export const NoteNotFoundError = new UserInputError("note not found");
+export const NoteAlreadyExistError = new UserInputError("note already exist");

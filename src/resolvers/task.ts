@@ -19,6 +19,7 @@ import { List } from "../entity/list";
 import { TaskAuthorized, ListAuthorized } from "../decorator/authorization";
 import { Repeat } from "../entity/repeat";
 import { UpsertRepeatInput } from "./repeat";
+import { Note } from "../entity/note";
 
 @InputType({ description: "New task data" })
 class UpdateTaskInput implements Partial<Task> {
@@ -177,6 +178,11 @@ export class TaskObjectResolver implements ResolverInterface<Task> {
   repeat(@Root() task: Task): Promise<Repeat | undefined> {
     return getRepeatByTaskId(task.id);
   }
+
+  @FieldResolver()
+  note(@Root() task: Task): Promise<Note | undefined> {
+    return getNoteByTaskId(task.id);
+  }
 }
 
 // ------------------------- Business logic -------------------------
@@ -262,6 +268,14 @@ const getRepeatByTaskId = (taskId: string): Promise<Repeat | undefined> =>
   getRepository(Repeat)
     .createQueryBuilder("repeat")
     .leftJoinAndSelect("repeat.task", "task")
+    .where("task.id = :taskId", { taskId })
+    .andWhere("task.deleted is NULL")
+    .getOne();
+
+const getNoteByTaskId = (taskId: string): Promise<Note | undefined> =>
+  getRepository(Note)
+    .createQueryBuilder("note")
+    .leftJoinAndSelect("note.task", "task")
     .where("task.id = :taskId", { taskId })
     .andWhere("task.deleted is NULL")
     .getOne();

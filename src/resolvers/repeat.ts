@@ -32,7 +32,7 @@ export class UpsertRepeatInput implements Partial<Repeat> {
 }
 
 @Resolver()
-export class TaskResolver {
+export class RepeatResolver {
   @Authorized()
   @Mutation((_returns) => Repeat)
   async setRepeat(
