@@ -4,7 +4,10 @@ Server side codes for Overcast
 
 Frontend repo: https://github.com/williamsk91/clock
 
+![Overcast](https://user-images.githubusercontent.com/25893551/155019748-9c6a0c78-7ec4-4011-8d62-2e6560456857.png)
+
 # Stack
+
 
 - Language - [Typescript](https://www.typescriptlang.org/)
 - Database - [PostgreSQL](https://www.postgresql.org/)
