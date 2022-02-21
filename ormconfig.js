@@ -2,7 +2,7 @@ const typeOrmDir = process.env.NODE_ENV === "development" ? "src" : "dist";
 
 const baseConfig = {
   type: "postgres",
-  synchronize: false,
+  synchronize: true,
   logging: false,
   entities: [`${typeOrmDir}/entity/**/*`],
   migrations: [`${typeOrmDir}/migration/**/*`],
@@ -16,7 +16,7 @@ const localConfig = {
   ...baseConfig,
   host: "localhost",
   port: 5432,
-  username: "williams",
+  username: "postgres",
   password: "postgres",
   database: "time",
 };

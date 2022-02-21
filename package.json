@@ -4,7 +4,7 @@
   "description": "GraphQL server for Overcast - Calendar & Task",
   "private": true,
   "engines": {
-    "node": "14.x"
+    "node": "16.x"
   },
   "dependencies": {
     "apollo-server-errors": "^2.4.2",

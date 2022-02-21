@@ -2,6 +2,8 @@
 
 Server side codes for Overcast
 
+Frontend repo: https://github.com/williamsk91/clock
+
 # Stack
 
 - Language - [Typescript](https://www.typescriptlang.org/)
@@ -43,7 +45,7 @@ Also ensure that a local postgres database is created with credentials specified
   port: 5432,
   username: "postgres",
   password: "postgres",
-  database: "ink-db"
+  database: "time"
 ```
 
 ## Start development
